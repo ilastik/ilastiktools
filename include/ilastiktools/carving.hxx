@@ -7,7 +7,7 @@
 #include <vigra/timing.hxx>
 
 #ifdef WITH_OPENMP
-#include <omp.h>
+    #include <omp.h>
 #endif 
 
 namespace vigra{

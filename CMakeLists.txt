@@ -17,6 +17,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 include(ILASTIKTOOLS_ADD_NUMPY_MODULE)
 
+
 project(inferos)
 set (ILASTIKTOOLS_VERSION_MAJOR 0)
 set (ILASTIKTOOLS_VERSION_MINOR 2)
@@ -48,6 +49,8 @@ include_directories(${VIGRA_INCLUDE_DIR})
 FIND_PACKAGE(Threads REQUIRED)  # includes pthread
 FIND_PACKAGE(NUMPY REQUIRED)
 include_directories(${DerPYTHON_NUMPY_INCLUDE_DIR})
+include(VigraFindPackage)
+include(FindVIGRANUMPY_DEPENDENCIES)
 
 #-------------------------------------------------------------------------------------------------------------------
 # OpenMP
