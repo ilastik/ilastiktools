@@ -6,7 +6,9 @@
 #include <vigra/multi_gridgraph.hxx>
 #include <vigra/timing.hxx>
 
+#ifdef WITH_OPENMP
 #include <omp.h>
+#endif 
 
 namespace vigra{
 
