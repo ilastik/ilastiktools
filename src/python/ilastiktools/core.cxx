@@ -38,7 +38,7 @@
 
 
 /*vigra*/
-#include <vigra/ilastiktools/carving.hxx>
+#include <ilastiktools/carving.hxx>
 
 
 /*vigra python */

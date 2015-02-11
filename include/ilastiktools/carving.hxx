@@ -1,10 +1,10 @@
 #ifndef VIGRA_ILASTIKTOOLS_CARVING_HXX
 #define VIGRA_ILASTIKTOOLS_CARVING_HXX
 
-#include "../adjacency_list_graph.hxx"
-#include "../timing.hxx"
-#include "../multi_gridgraph.hxx"
-#include "../timing.hxx"
+#include <vigra/adjacency_list_graph.hxx>
+#include <vigra/timing.hxx>
+#include <vigra/multi_gridgraph.hxx>
+#include <vigra/timing.hxx>
 
 #include <omp.h>
 
