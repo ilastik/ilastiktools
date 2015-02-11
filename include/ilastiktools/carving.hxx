@@ -150,7 +150,7 @@ namespace vigra{
                             const int eid = findEdgeFromIds(lu, lv);
                             #ifdef WITH_OPENMP
                             omp_set_lock(&(edgeLocks[eid]));
-                            #endif WITH_OPENMP
+                            #endif 
                             counting[eid]+=2;
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y,z));
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x+1,y,z));
@@ -165,7 +165,7 @@ namespace vigra{
                             const int eid = findEdgeFromIds(lu, lv);
                             #ifdef WITH_OPENMP
                             omp_set_lock(&(edgeLocks[eid]));
-                            #endif WITH_OPENMP
+                            #endif 
                             counting[eid]+=2;
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y,z));
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y+1,z));
@@ -180,7 +180,7 @@ namespace vigra{
                             const int eid = findEdgeFromIds(lu, lv);
                             #ifdef WITH_OPENMP
                             omp_set_lock(&(edgeLocks[eid]));
-                            #endif WITH_OPENMP
+                            #endif 
                             counting[eid]+=2;
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y,z));
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y,z+1));
