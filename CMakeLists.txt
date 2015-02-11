@@ -47,7 +47,7 @@ include_directories(${VIGRA_INCLUDE_DIR})
 
 FIND_PACKAGE(Threads REQUIRED)  # includes pthread
 FIND_PACKAGE(NUMPY REQUIRED)
-include_directories(${PYTHON_NUMPY_INCLUDE_DIR})
+include_directories(${DerPYTHON_NUMPY_INCLUDE_DIR})
 
 #-------------------------------------------------------------------------------------------------------------------
 # OpenMP

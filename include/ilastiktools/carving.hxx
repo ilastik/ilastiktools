@@ -198,7 +198,7 @@ namespace vigra{
                 omp_destroy_lock(&(edgeLocks[i]));
             }
             delete[] edgeLocks;
-            #endif WITH_OPENMP
+            #endif 
 
             // normalize
             #pragma omp parallel for
