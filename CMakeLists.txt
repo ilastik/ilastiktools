@@ -41,7 +41,10 @@ file(GLOB_RECURSE headers include/*.hxx)
 file(GLOB_RECURSE headers ${CMAKE_INSTALL_PREFIX}/include/*.hxx)
 include_directories(include)
 
-
+# If libboost_python.so and libboost_python-mt.so exist on the same machine,
+#  we can get into trouble if we don't link against the same version that vigra used.
+#  (vigra uses the version without -mt)
+set(Boost_USE_MULTITHREADED OFF)
 
 FIND_PACKAGE(VIGRA REQUIRED)  
 include_directories(${VIGRA_INCLUDE_DIR})
