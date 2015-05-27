@@ -298,7 +298,6 @@ namespace vigra{
         {
 
             //USETICTOC;
-            std::cout<<"LALALALLA\n";
             //std::cout<<"get RAG\n";
             //TIC;
             // get the RAG
