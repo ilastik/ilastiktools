@@ -5,6 +5,7 @@
 #include <vigra/timing.hxx>
 #include <vigra/multi_gridgraph.hxx>
 #include <vigra/timing.hxx>
+#include <vigra/graph_algorithms.hxx>
 
 #ifdef WITH_OPENMP
     #include <omp.h>
@@ -296,13 +297,12 @@ namespace vigra{
         )
         {
 
-            USETICTOC;
-
-            std::cout<<"get RAG\n";
-            TIC;
+            //USETICTOC;
+            //std::cout<<"get RAG\n";
+            //TIC;
             // get the RAG
             graph_.assignLabels(labels);
-            TOC;
+            //TOC;
 
 
 
@@ -313,11 +313,11 @@ namespace vigra{
             nodeSeeds_.reshape(Shape1(graph_.maxNodeId()+ 1));
             resultSegmentation_.reshape(Shape1(graph_.maxNodeId()+ 1));
 
-            std::cout<<"get edge weights\n";
-            TIC;
+            //std::cout<<"get edge weights\n";
+            //TIC;
             // accumulate the edge weights
             graph_.accumulateEdgeFeatures(weightArray, edgeWeights_);
-            TOC;
+            //TOC;
         }
 
         void preprocessingFromSerialization(
@@ -329,13 +329,13 @@ namespace vigra{
         )
         {
 
-            USETICTOC;
+            //USETICTOC;
 
-            std::cout<<"get RAG from serialization\n";
-            TIC;
+            //std::cout<<"get RAG from serialization\n";
+            //TIC;
             // get the RAG
             graph_.assignLabelsFromSerialization(labels, serialization);
-            TOC;
+            //TOC;
 
 
             // assign weights and seeds
@@ -359,7 +359,7 @@ namespace vigra{
             GridSegmentorNodeMap<UInt8> nodeSeeds(nodeSeeds_);
             GridSegmentorNodeMap<UInt8> resultSegmentation(resultSegmentation_);
             GridSegmentorEdgeMap<VALUE_TYPE> edgeWeights(edgeWeights_);
-            std::cout<<"run with bias "<<bias<<" no noBiasBelow "<<noBiasBelow<<"\n";
+            //std::cout<<"run with bias "<<bias<<" no noBiasBelow "<<noBiasBelow<<"\n";
             carvingSegmentation(graph_, edgeWeights, nodeSeeds, 1, bias,noBiasBelow, resultSegmentation);
         }
 
@@ -466,19 +466,20 @@ namespace vigra{
             const LabelView & labels = graph_.labels();
 
             for(size_t i=0; i<fgSeedsCoord.shape(1); ++i){
-                vigra::TinyVector<MultiArrayIndex, 3> c;
-                c[0] = fgSeedsCoord(0,i);
-                c[1] = fgSeedsCoord(1,i);
-                c[2] = fgSeedsCoord(2,i);
+                vigra::TinyVector<MultiArrayIndex, DIM> c;
+
+                for(int dd=0; dd<DIM; ++dd){
+                    c[dd] = fgSeedsCoord(dd,i);
+                }
                 const UInt64 node = labels[c];
                 nodeSeeds_[node] = 2;
             }
 
             for(size_t i=0; i<bgSeedsCoord.shape(1); ++i){
-                vigra::TinyVector<MultiArrayIndex, 3> c;
-                c[0] = bgSeedsCoord(0,i);
-                c[1] = bgSeedsCoord(1,i);
-                c[2] = bgSeedsCoord(2,i);
+                vigra::TinyVector<MultiArrayIndex, DIM> c;
+                for(int dd=0; dd<DIM; ++dd){
+                    c[dd] = bgSeedsCoord(dd,i);
+                }
                 const UInt64 node = labels[c];
                 nodeSeeds_[node] = 2;
             }

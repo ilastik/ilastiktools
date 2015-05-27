@@ -48,11 +48,11 @@
 #include <vigra/numpy_array.hxx>
 #include <vigra/numpy_array_converters.hxx>
 
-#include "export_graph_visitor.hxx"
-#include "export_graph_rag_visitor.hxx"
-#include "export_graph_algorithm_visitor.hxx"
-#include "export_graph_shortest_path_visitor.hxx"
-#include "export_graph_hierarchical_clustering_visitor.hxx"
+// #include "export_graph_visitor.hxx"
+// #include "export_graph_rag_visitor.hxx"
+// #include "export_graph_algorithm_visitor.hxx"
+// #include "export_graph_shortest_path_visitor.hxx"
+// #include "export_graph_hierarchical_clustering_visitor.hxx"
 
 
 
@@ -285,8 +285,8 @@ void defineGridRag(const std::string & clsName){
 
     python::class_<Graph>(clsName.c_str(),python::init<  >())
         //.def("__init__",python::make_constructor(&pyGridGraphFactory3d<DIM,boost::undirected_tag>))
-        .def(LemonUndirectedGraphCoreVisitor<Graph>(clsName))
-        .def(LemonGraphAlgorithmVisitor<Graph>(clsName))
+        //.def(LemonUndirectedGraphCoreVisitor<Graph>(clsName))
+        //.def(LemonGraphAlgorithmVisitor<Graph>(clsName))
         // my functions
         .def("assignLabels",registerConverters(&pyAssignLabels<DIM, LABEL_TYPE>))
         .def("accumulateEdgeFeatures", 
@@ -411,6 +411,10 @@ BOOST_PYTHON_MODULE_INIT(_core)
     import_vigranumpy();
 
     python::docstring_options doc_options(true, true, false);
+
+
+    defineGridRag<2, vigra::UInt32>("GridRag_2D_UInt32");
+    defineGridSegmentor<2, vigra::UInt32>("GridSegmentor_2D_UInt32");
 
 
     defineGridRag<3, vigra::UInt32>("GridRag_3D_UInt32");
