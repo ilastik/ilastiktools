@@ -36,6 +36,9 @@
 #define PY_ARRAY_UNIQUE_SYMBOL vigranumpyilastiktools_PyArray_API
 //#define NO_IMPORT_ARRAY
 
+// Include this first to avoid name conflicts for boost::tie,
+// similar to issue described in vigra#237
+#include <boost/tuple/tuple.hpp>
 
 /*vigra*/
 #include <ilastiktools/carving.hxx>
