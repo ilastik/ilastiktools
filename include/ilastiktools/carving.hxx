@@ -32,7 +32,6 @@ namespace vigra{
             const Edge e  = this->findEdge(this->nodeFromId(lu), this->nodeFromId(lv));
             return this->id(e);
         }
-
         void assignLabels(const MultiArrayView<DIM, LABELS> & labels){
 
 
@@ -352,7 +351,10 @@ namespace vigra{
                 nodeSeeds_[i]=0;
             }
         }
-
+        
+        void clearSegmentation(){
+            resultSegmentation_ = 0;
+        }
 
         void run(float bias, float noBiasBelow){
 

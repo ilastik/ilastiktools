@@ -364,6 +364,7 @@ void defineGridSegmentor(const std::string & clsName){
         .def("maxEdgeId",&Segmentor::maxEdgeId)
         .def("run",&Segmentor::run)
         .def("clearSeeds",&Segmentor::clearSeeds)
+        .def("clearSegmentation",&Segmentor::clearSegmentation)
         .def("serializeGraph", registerConverters(&pySerializeGraph<DIM, LABEL_TYPE>),
             (
                 python::arg("out") = python::object()
