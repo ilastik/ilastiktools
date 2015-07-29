@@ -103,7 +103,7 @@ namespace vigra{
             #ifdef WITH_OPENMP
             omp_lock_t * edgeLocks = new omp_lock_t[this->edgeNum()];
             #pragma omp parallel for
-            for(size_t i=0; i<this->edgeNum();++i){
+            for(ptrdiff_t i=0; i<(ptrdiff_t)this->edgeNum();++i){
                 omp_init_lock(&(edgeLocks[i]));
             }
             #endif
@@ -140,7 +140,7 @@ namespace vigra{
 
                 //do the accumulation
                 #pragma omp parallel for
-                for(size_t z=0; z<shape[2]; ++z)
+                for(ptrdiff_t z=0; z<(ptrdiff_t)shape[2]; ++z)
                 for(size_t y=0; y<shape[1]; ++y)
                 for(size_t x=0; x<shape[0]; ++x){
                     const LabelType lu  = labelView_(x, y, z);
@@ -194,7 +194,7 @@ namespace vigra{
 
             #ifdef WITH_OPENMP
             #pragma omp parallel for
-            for(size_t i=0; i<this->edgeNum();++i){
+            for(ptrdiff_t i=0; i<(ptrdiff_t)this->edgeNum();++i){
                 omp_destroy_lock(&(edgeLocks[i]));
             }
             delete[] edgeLocks;
@@ -202,7 +202,7 @@ namespace vigra{
 
             // normalize
             #pragma omp parallel for
-            for(size_t i=0; i<this->edgeNum();++i){
+            for(ptrdiff_t i=0; i<(ptrdiff_t)this->edgeNum();++i){
                 featuresOut[i]/=counting[i];
             }
 
@@ -347,7 +347,7 @@ namespace vigra{
 
         void clearSeeds(){
             #pragma omp parallel for
-            for(size_t i=0; i<this->nodeNum();++i){
+            for(ptrdiff_t i=0; i<(ptrdiff_t)this->nodeNum();++i){
                 nodeSeeds_[i]=0;
             }
         }
