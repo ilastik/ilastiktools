@@ -68,17 +68,17 @@ IF(PYTHONINTERP_V2_FOUND)
     #      (usually PYTHONDIR/Lib/site-packages)
     #
     ######################################################################
-    IF(NOT DEFINED VIGRANUMPY_INSTALL_DIR OR VIGRANUMPY_INSTALL_DIR MATCHES "^$")
+    IF(NOT DEFINED PYTHON_SITE_PACKAGES OR PYTHON_SITE_PACKAGES MATCHES "^$")
         execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
                          "from distutils.sysconfig import *; print get_python_lib(1)"
                           OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-        FILE(TO_CMAKE_PATH ${PYTHON_SITE_PACKAGES} VIGRANUMPY_INSTALL_DIR)
+        FILE(TO_CMAKE_PATH ${PYTHON_SITE_PACKAGES} PYTHON_SITE_PACKAGES)
     ENDIF()
-    SET(VIGRANUMPY_INSTALL_DIR ${VIGRANUMPY_INSTALL_DIR}
+    SET(PYTHON_SITE_PACKAGES ${PYTHON_SITE_PACKAGES}
         CACHE PATH "where to install the VIGRA Python package" FORCE)
     # this is the install path relative to CMAKE_INSTALL_PREFIX,
     # use this in INSTALL() commands to get packaging right
-    FILE(RELATIVE_PATH VIGRANUMPY_INSTALL_DIR ${CMAKE_INSTALL_PREFIX} ${VIGRANUMPY_INSTALL_DIR})
+    FILE(RELATIVE_PATH PYTHON_SITE_PACKAGES ${CMAKE_INSTALL_PREFIX} ${PYTHON_SITE_PACKAGES})
 
     ######################################################################
     #
@@ -154,7 +154,7 @@ IF(PYTHONINTERP_V2_FOUND)
     INCLUDE(FindPackageHandleStandardArgs)
     FIND_PACKAGE_HANDLE_STANDARD_ARGS(VIGRANUMPY_DEPENDENCIES DEFAULT_MSG
                          PYTHONINTERP_V2_FOUND PYTHONLIBS_FOUND
-                         Boost_PYTHON_FOUND PYTHON_NUMPY_INCLUDE_DIR VIGRANUMPY_INSTALL_DIR)
+                         Boost_PYTHON_FOUND PYTHON_NUMPY_INCLUDE_DIR PYTHON_SITE_PACKAGES)
 
     IF(NOT VIGRANUMPY_INCLUDE_DIRS OR VIGRANUMPY_INCLUDE_DIRS MATCHES "-NOTFOUND")
         #note that the numpy include dir is set _before_ the python include dir, such that
