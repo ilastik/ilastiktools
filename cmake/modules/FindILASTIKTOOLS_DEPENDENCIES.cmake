@@ -1,6 +1,6 @@
-# - Find VIGRANUMPY_DEPENDENCIES
+# - Find ILASTIKTOOLS_DEPENDENCIES
 #
-MESSAGE(STATUS "Checking VIGRANUMPY_DEPENDENCIES")
+MESSAGE(STATUS "Checking ILASTIKTOOLS_DEPENDENCIES")
 
 FIND_PACKAGE(PythonInterp 2)
 
@@ -12,7 +12,7 @@ IF(PYTHONINTERP_FOUND)
     IF(${PYTHON_MAJOR_VERSION} EQUAL 2)
         SET(PYTHONINTERP_V2_FOUND 1)
     ELSE()
-        MESSAGE(STATUS "vigranumpy currently requires Python 2.x.")
+        MESSAGE(STATUS "ilastiktools currently requires Python 2.x.")
         MESSAGE(STATUS "Make sure that Python 2 is in your PATH or use 'cmake_gui' to set the PYTHON_EXECUTABLE variable manually.")
         SET(PYTHONINTERP_V2_FOUND 0)
     ENDIF()
@@ -40,7 +40,7 @@ IF(PYTHONINTERP_V2_FOUND)
         execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
                          "import sys; skip = 2 if sys.platform.startswith('win') else 1; print 'python' + sys.version[0:3:skip]"
                           OUTPUT_VARIABLE PYTHON_LIBRARY_NAME OUTPUT_STRIP_TRAILING_WHITESPACE)
-        FIND_LIBRARY(PYTHON_LIBRARIES ${PYTHON_LIBRARY_NAME} HINTS "${PYTHON_PREFIX}" 
+        FIND_LIBRARY(PYTHON_LIBRARIES ${PYTHON_LIBRARY_NAME} HINTS "${PYTHON_PREFIX}"
                      PATH_SUFFIXES lib lib64 libs DOC "Python libraries")
     ENDIF()
 
@@ -60,7 +60,10 @@ IF(PYTHONINTERP_V2_FOUND)
         MESSAGE(STATUS "Could NOT find Python libraries and/or includes")
     ENDIF()
 
-    VIGRA_FIND_PACKAGE( Boost 1.40.0 COMPONENTS python )
+    find_package(Boost 1.47 COMPONENTS python REQUIRED)
+    if("${Boost_PYTHON_LIBRARY}" MATCHES "boost_python\\.lib")
+        ADD_DEFINITIONS(-DBOOST_AUTO_LINK_NOMANGLE)
+    endif()
 
     ######################################################################
     #
@@ -152,23 +155,23 @@ IF(PYTHONINTERP_V2_FOUND)
     #
     ######################################################################
     INCLUDE(FindPackageHandleStandardArgs)
-    FIND_PACKAGE_HANDLE_STANDARD_ARGS(VIGRANUMPY_DEPENDENCIES DEFAULT_MSG
+    FIND_PACKAGE_HANDLE_STANDARD_ARGS(ILASTIKTOOLS_DEPENDENCIES DEFAULT_MSG
                          PYTHONINTERP_V2_FOUND PYTHONLIBS_FOUND
                          Boost_PYTHON_FOUND PYTHON_NUMPY_INCLUDE_DIR PYTHON_SITE_PACKAGES)
 
-    IF(NOT VIGRANUMPY_INCLUDE_DIRS OR VIGRANUMPY_INCLUDE_DIRS MATCHES "-NOTFOUND")
+    IF(NOT ILASTIKTOOLS_INCLUDE_DIRS OR ILASTIKTOOLS_INCLUDE_DIRS MATCHES "-NOTFOUND")
         #note that the numpy include dir is set _before_ the python include dir, such that
         #installing a more recent version of numpy on top of an existing python installation
         #works (otherwise, numpy includes are picked up from ${PYTHON_INCLUDE_PATH}/numpy )
-        SET(VIGRANUMPY_INCLUDE_DIRS ${PYTHON_NUMPY_INCLUDE_DIR} ${PYTHON_INCLUDE_PATH} ${Boost_INCLUDE_DIR})
+        SET(ILASTIKTOOLS_INCLUDE_DIRS ${PYTHON_NUMPY_INCLUDE_DIR} ${PYTHON_INCLUDE_PATH} ${Boost_INCLUDE_DIR})
     ENDIF()
-    SET(VIGRANUMPY_INCLUDE_DIRS ${VIGRANUMPY_INCLUDE_DIRS}
-        CACHE PATH "include directories needed by VIGRA Python bindings"
+    SET(ILASTIKTOOLS_INCLUDE_DIRS ${ILASTIKTOOLS_INCLUDE_DIRS}
+        CACHE PATH "include directories needed by ilastiktools Python bindings"
         FORCE)
-    IF(NOT VIGRANUMPY_LIBRARIES OR VIGRANUMPY_LIBRARIES MATCHES "-NOTFOUND")
-        SET(VIGRANUMPY_LIBRARIES ${PYTHON_LIBRARIES} ${Boost_PYTHON_LIBRARY})
+    IF(NOT ILASTIKTOOLS_LIBRARIES OR ILASTIKTOOLS_LIBRARIES MATCHES "-NOTFOUND")
+        SET(ILASTIKTOOLS_LIBRARIES ${PYTHON_LIBRARIES} ${Boost_PYTHON_LIBRARY})
     ENDIF()
-    SET(VIGRANUMPY_LIBRARIES ${VIGRANUMPY_LIBRARIES}
-        CACHE FILEPATH "libraries needed by VIGRA Python bindings"
+    SET(ILASTIKTOOLS_LIBRARIES ${ILASTIKTOOLS_LIBRARIES}
+        CACHE FILEPATH "libraries needed by ilastiktools Python bindings"
         FORCE)
 ENDIF()

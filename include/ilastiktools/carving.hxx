@@ -9,7 +9,7 @@
 
 #ifdef WITH_OPENMP
     #include <omp.h>
-#endif 
+#endif
 
 namespace vigra{
 
@@ -50,8 +50,8 @@ namespace vigra{
             const Shape shape = labelView_.shape();
 
             if(DIM == 2){
-                for(size_t y=0; y<shape[1]; ++y)
-                for(size_t x=0; x<shape[0]; ++x){
+                for(ptrdiff_t y=0; y<shape[1]; ++y)
+                for(ptrdiff_t x=0; x<shape[0]; ++x){
                     const LabelType l  = labelView_(x, y);
                     if(x+1 < shape[0] )
                         maybeAddEdge(l, labelView_(x+1, y));
@@ -60,9 +60,9 @@ namespace vigra{
                 }
             }
             else if(DIM==3){
-                for(size_t z=0; z<shape[2]; ++z)
-                for(size_t y=0; y<shape[1]; ++y)
-                for(size_t x=0; x<shape[0]; ++x){
+                for(ptrdiff_t z=0; z<shape[2]; ++z)
+                for(ptrdiff_t y=0; y<shape[1]; ++y)
+                for(ptrdiff_t x=0; x<shape[0]; ++x){
                     const LabelType l  = labelView_(x, y, z);
                     if(x+1 < shape[0] )
                         maybeAddEdge(l, labelView_(x+1, y, z));
@@ -91,7 +91,7 @@ namespace vigra{
             MultiArrayView<1, WEIGHTS_OUT > & featuresOut
         ){
 
- 
+
             const Shape shape = labelView_.shape();
             MultiArray<1, UInt32>   counting(Shape1(this->edgeNum()));
 
@@ -99,7 +99,7 @@ namespace vigra{
 
             // initiaize output with zeros
             featuresOut = WEIGHTS_OUT(0);
-            
+
             #ifdef WITH_OPENMP
             omp_lock_t * edgeLocks = new omp_lock_t[this->edgeNum()];
             #pragma omp parallel for
@@ -111,8 +111,8 @@ namespace vigra{
 
             if(DIM==2){
                 //do the accumulation
-                for(size_t y=0; y<shape[1]; ++y)
-                for(size_t x=0; x<shape[0]; ++x){
+                for(ptrdiff_t y=0; y<shape[1]; ++y)
+                for(ptrdiff_t x=0; x<shape[0]; ++x){
                     const LabelType lu  = labelView_(x, y);
                     if(x+1 < shape[0]){
                         const LabelType lv = labelView_(x+1, y);
@@ -140,9 +140,9 @@ namespace vigra{
 
                 //do the accumulation
                 #pragma omp parallel for
-                for(ptrdiff_t z=0; z<(ptrdiff_t)shape[2]; ++z)
-                for(size_t y=0; y<shape[1]; ++y)
-                for(size_t x=0; x<shape[0]; ++x){
+                for(ptrdiff_t z=0; z<shape[2]; ++z)
+                for(ptrdiff_t y=0; y<shape[1]; ++y)
+                for(ptrdiff_t x=0; x<shape[0]; ++x){
                     const LabelType lu  = labelView_(x, y, z);
                     if(x+1 < shape[0]){
                         const LabelType lv = labelView_(x+1, y, z);
@@ -150,7 +150,7 @@ namespace vigra{
                             const int eid = findEdgeFromIds(lu, lv);
                             #ifdef WITH_OPENMP
                             omp_set_lock(&(edgeLocks[eid]));
-                            #endif 
+                            #endif
                             counting[eid]+=2;
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y,z));
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x+1,y,z));
@@ -165,7 +165,7 @@ namespace vigra{
                             const int eid = findEdgeFromIds(lu, lv);
                             #ifdef WITH_OPENMP
                             omp_set_lock(&(edgeLocks[eid]));
-                            #endif 
+                            #endif
                             counting[eid]+=2;
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y,z));
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y+1,z));
@@ -180,7 +180,7 @@ namespace vigra{
                             const int eid = findEdgeFromIds(lu, lv);
                             #ifdef WITH_OPENMP
                             omp_set_lock(&(edgeLocks[eid]));
-                            #endif 
+                            #endif
                             counting[eid]+=2;
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y,z));
                             featuresOut[eid]+=static_cast<WEIGHTS_OUT>(featuresIn(x,y,z+1));
@@ -198,7 +198,7 @@ namespace vigra{
                 omp_destroy_lock(&(edgeLocks[i]));
             }
             delete[] edgeLocks;
-            #endif 
+            #endif
 
             // normalize
             #pragma omp parallel for
@@ -230,7 +230,7 @@ namespace vigra{
         typedef const T & ConstReference;
         GridSegmentorEdgeMap(MultiArrayView<1, T> & values)
         : values_(values){
-            
+
         }
         template<class K>
         Reference operator[](const K key){
@@ -268,9 +268,9 @@ namespace vigra{
         MultiArrayView<1, T> & values_;
     };
 
-    template<  
-        unsigned int DIM, 
-        class LABELS, 
+    template<
+        unsigned int DIM,
+        class LABELS,
         class VALUE_TYPE
     >
     class GridSegmentor{
@@ -305,7 +305,7 @@ namespace vigra{
 
 
 
-            // now we have the RAG  we can 
+            // now we have the RAG  we can
             // reshape weights and seeds
             // and resultSegmentation
             edgeWeights_.reshape(Shape1(graph_.edgeNum()));
@@ -351,7 +351,7 @@ namespace vigra{
                 nodeSeeds_[i]=0;
             }
         }
-        
+
         void clearSegmentation(){
             resultSegmentation_ = 0;
         }
@@ -467,7 +467,7 @@ namespace vigra{
 
             const LabelView & labels = graph_.labels();
 
-            for(size_t i=0; i<fgSeedsCoord.shape(1); ++i){
+            for(ptrdiff_t i=0; i<fgSeedsCoord.shape(1); ++i){
                 vigra::TinyVector<MultiArrayIndex, DIM> c;
 
                 for(int dd=0; dd<DIM; ++dd){
@@ -477,7 +477,7 @@ namespace vigra{
                 nodeSeeds_[node] = 2;
             }
 
-            for(size_t i=0; i<bgSeedsCoord.shape(1); ++i){
+            for(ptrdiff_t i=0; i<bgSeedsCoord.shape(1); ++i){
                 vigra::TinyVector<MultiArrayIndex, DIM> c;
                 for(int dd=0; dd<DIM; ++dd){
                     c[dd] = bgSeedsCoord(dd,i);
@@ -499,7 +499,7 @@ namespace vigra{
 
         void setResulFgObj(MultiArray<1 , Int64>  fgNodes ){
             resultSegmentation_ = 1;
-            for(size_t i=0; i<fgNodes.shape(0); ++i){
+            for(ptrdiff_t i=0; i<fgNodes.shape(0); ++i){
                 resultSegmentation_[fgNodes(i)] = 2;
             }
         }
