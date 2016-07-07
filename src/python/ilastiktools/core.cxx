@@ -284,7 +284,7 @@ void defineGridRag(const std::string & clsName){
     typedef GridRag<DIM, LABEL_TYPE> Graph;
 
     python::class_<Graph>(clsName.c_str(),python::init<  >())
-        //.def("__init__",python::make_constructor(&pyGridGraphFactory3d<DIM,boost::undirected_tag>))
+        //.def("__init__",python::make_constructor(&pyGridGraphFactory3d<DIM,boost_graph::undirected_tag>))
         //.def(LemonUndirectedGraphCoreVisitor<Graph>(clsName))
         //.def(LemonGraphAlgorithmVisitor<Graph>(clsName))
         // my functions

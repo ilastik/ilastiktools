@@ -20,7 +20,7 @@ namespace vigra{
     : public AdjacencyListGraph
     {
     public:
-        typedef GridGraph<DIM, boost::undirected_tag>  GridGraphType;
+        typedef GridGraph<DIM, boost_graph::undirected_tag>  GridGraphType;
         typedef LABELS LabelType;
         typedef TinyVector<MultiArrayIndex, DIM>  Shape;
         typedef TinyVector<MultiArrayIndex,   1>  Shape1;
