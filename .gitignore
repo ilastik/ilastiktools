@@ -26,3 +26,8 @@
 *.exe
 *.out
 *.app
+
+# Misc IDE files
+.cproject
+.project
+.settings
