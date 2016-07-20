@@ -38,6 +38,7 @@
 
 #include <utility>
 #include <vector>
+#include <unordered_set>
 #include <unordered_map>
 
 // Include this first to avoid name conflicts for boost::tie,
@@ -500,6 +501,81 @@ python::tuple pythonEdgeCoords2D(NumpyArray<2, UInt32> const & src)
 }
 
 
+python::dict line_segments_for_labels( NumpyArray<2, UInt32> label_img )
+{
+    typedef NumpyArray<3, UInt32> line_segment_array_t;
+    typedef std::unordered_map<edge_id_t, line_segment_array_t, boost::hash<edge_id_t> > line_segment_lookup_t;
+
+    namespace py = boost::python;
+    auto lookup_pair = edgeCoords2D(label_img);
+    auto const & horizontal_coord_lookup = lookup_pair.first;
+    auto const & vertical_coord_lookup = lookup_pair.second;
+
+    typedef std::unordered_set<edge_id_t, boost::hash<edge_id_t> > edge_id_set_t;
+    edge_id_set_t all_edge_ids;
+    for ( auto const & k_v : horizontal_coord_lookup )
+    {
+        all_edge_ids.insert(k_v.first);
+    }
+    for ( auto const & k_v : vertical_coord_lookup )
+    {
+        all_edge_ids.insert(k_v.first);
+    }
+
+    line_segment_lookup_t line_seg_lookup;
+    for ( auto const & edge_id : all_edge_ids )
+    {
+        // Empty by default
+        std::vector<Shape2> horizontal_edge_coords;
+        std::vector<Shape2> vertical_edge_coords;
+
+        // Overwrite if found
+        auto iter_horizontal_coords = horizontal_coord_lookup.find(edge_id);
+        if ( iter_horizontal_coords != horizontal_coord_lookup.end() )
+        {
+            horizontal_edge_coords = iter_horizontal_coords->second;
+        }
+
+        // Overwrite if found
+        auto iter_vertical_coords = vertical_coord_lookup.find(edge_id);
+        if ( iter_vertical_coords != vertical_coord_lookup.end() )
+        {
+            vertical_edge_coords = iter_vertical_coords->second;
+        }
+
+        // Create line segments to the RIGHT of the edge coordinate
+        auto num_segments = horizontal_edge_coords.size() + vertical_edge_coords.size();
+        line_seg_lookup[edge_id] = line_segment_array_t(Shape3(num_segments, 2, 2));
+        auto line_segments = line_seg_lookup[edge_id];
+
+        for ( int i = 0; i < horizontal_edge_coords.size(); ++i )
+        {
+            line_segments(i, 0, 0) = horizontal_edge_coords[i][0] + 1;
+            line_segments(i, 0, 1) = horizontal_edge_coords[i][1] + 0;
+            line_segments(i, 1, 0) = horizontal_edge_coords[i][0] + 1;
+            line_segments(i, 1, 1) = horizontal_edge_coords[i][1] + 1;
+        }
+        auto offset = horizontal_edge_coords.size();
+        for ( int i = 0; i < vertical_edge_coords.size(); ++i )
+        {
+            line_segments(offset+i, 0, 0) = vertical_edge_coords[i][0] + 0;
+            line_segments(offset+i, 0, 1) = vertical_edge_coords[i][1] + 1;
+            line_segments(offset+i, 1, 0) = vertical_edge_coords[i][0] + 1;
+            line_segments(offset+i, 1, 1) = vertical_edge_coords[i][1] + 1;
+        }
+    }
+
+    py::dict ret;
+    for ( auto & k_v : line_seg_lookup )
+    {
+        auto const & edge_id = k_v.first;
+        ret[py::make_tuple(edge_id.first, edge_id.second)] = k_v.second;
+    }
+    return ret;
+}
+
+
+
 BOOST_PYTHON_MODULE_INIT(_core)
 {
     import_vigranumpy();
@@ -516,6 +592,7 @@ BOOST_PYTHON_MODULE_INIT(_core)
 
     using namespace boost::python;
     def("edgeCoords2D", registerConverters(&pythonEdgeCoords2D), (arg("src")));
+    def("line_segments_for_labels", registerConverters(&line_segments_for_labels), (arg("label_img")));
 }
 
 
