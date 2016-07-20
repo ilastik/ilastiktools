@@ -427,9 +427,9 @@ edge_coord_lookup_pair_t edgeCoords2D( MultiArrayView<2, UInt32> const & src )
     edge_coord_lookup_t horizontal_edge_coords;
     edge_coord_lookup_t vertical_edge_coords;
 
-    for (MultiArrayIndex x = 0; x < x_dim; ++x)
+    for (MultiArrayIndex y = 0; y < y_dim; ++y)
     {
-        for (MultiArrayIndex y = 0; y < y_dim; ++y)
+        for (MultiArrayIndex x = 0; x < x_dim; ++x)
         {
             // Lambda to append to a lookup
             auto append_to_lookup =
