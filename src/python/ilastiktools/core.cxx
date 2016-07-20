@@ -36,9 +36,14 @@
 #define PY_ARRAY_UNIQUE_SYMBOL vigranumpyilastiktools_PyArray_API
 //#define NO_IMPORT_ARRAY
 
+#include <utility>
+#include <vector>
+#include <unordered_map>
+
 // Include this first to avoid name conflicts for boost::tie,
 // similar to issue described in vigra#237
 #include <boost/tuple/tuple.hpp>
+#include <boost/functional/hash.hpp>
 
 /*vigra*/
 #include <ilastiktools/carving.hxx>
@@ -403,8 +408,96 @@ void defineGridSegmentor(const std::string & clsName){
     ;
 }
 
+// Define lookup type:
+// (u,v) -> [(x,y), (x,y),...]
+typedef std::pair<UInt32, UInt32> edge_id_t;
+typedef std::unordered_map<edge_id_t,
+                           std::vector<Shape2>,
+                           boost::hash<edge_id_t> > edge_coord_lookup_t;
 
+typedef std::pair<edge_coord_lookup_t, edge_coord_lookup_t> edge_coord_lookup_pair_t;
 
+edge_coord_lookup_pair_t edgeCoords2D( MultiArrayView<2, UInt32> const & src )
+{
+    using namespace vigra;
+    MultiArrayIndex x_dim = src.shape(0);
+    MultiArrayIndex y_dim = src.shape(1);
+
+    edge_coord_lookup_t horizontal_edge_coords;
+    edge_coord_lookup_t vertical_edge_coords;
+
+    for (MultiArrayIndex x = 0; x < x_dim; ++x)
+    {
+        for (MultiArrayIndex y = 0; y < y_dim; ++y)
+        {
+            // Lambda to append to a lookup
+            auto append_to_lookup =
+            [&](edge_coord_lookup_t & lookup, MultiArrayIndex x1, MultiArrayIndex y1)
+            {
+                auto u = src(x,y);
+                auto v = src(x1,y1);
+                edge_id_t edge_id = (u < v) ? std::make_pair(u,v) : std::make_pair(v,u);
+
+                auto iter = lookup.find(edge_id);
+                if ( iter == lookup.end() )
+                {
+                    // Edge not yet seen. Create a new coord vector
+                    auto coord_list = std::vector<Shape2>();
+                    coord_list.push_back(Shape2(x,y));
+                    lookup[edge_id] = coord_list;
+                }
+                else
+                {
+                    // Append to coord vector
+                    auto & coord_list = iter->second;
+                    coord_list.push_back(Shape2(x,y));
+                }
+            };
+
+            // Check to the right
+            if (x < x_dim-1 && src(x,y) != src(x+1,y))
+            {
+                append_to_lookup(horizontal_edge_coords, x+1, y);
+            }
+
+            // Check below
+            if (y < y_dim-1 && src(x,y) != src(x,y+1))
+            {
+                append_to_lookup(vertical_edge_coords, x, y+1);
+            }
+        }
+    }
+    return std::make_pair(horizontal_edge_coords, vertical_edge_coords);
+}
+
+python::dict edgeCoordLookupToPython( edge_coord_lookup_t const & edge_coord_lookup )
+{
+    namespace py = boost::python;
+
+    py::dict pylookup;
+    for ( auto & edge_and_coords : edge_coord_lookup )
+    {
+        edge_id_t const & edge_id = edge_and_coords.first;
+        std::vector<Shape2> const & coords = edge_and_coords.second;
+
+        py::list pycoords;
+        for ( auto coord : coords )
+        {
+            pycoords.append(py::make_tuple(coord[0], coord[1]));
+        }
+        pylookup[py::make_tuple(edge_id.first, edge_id.second)] = pycoords;
+    }
+    return pylookup;
+}
+
+python::tuple pythonEdgeCoords2D(NumpyArray<2, UInt32> const & src)
+{
+    namespace py = boost::python;
+    auto lookup_pair = edgeCoords2D(src);
+    py::dict pycoords_horizontal = edgeCoordLookupToPython(lookup_pair.first);
+    py::dict pycoords_vertical = edgeCoordLookupToPython(lookup_pair.second);
+    return py::make_tuple( pycoords_horizontal, pycoords_vertical );
+}
 
 
 BOOST_PYTHON_MODULE_INIT(_core)
@@ -421,6 +514,8 @@ BOOST_PYTHON_MODULE_INIT(_core)
     defineGridRag<3, vigra::UInt32>("GridRag_3D_UInt32");
     defineGridSegmentor<3, vigra::UInt32>("GridSegmentor_3D_UInt32");
 
+    using namespace boost::python;
+    def("edgeCoords2D", registerConverters(&pythonEdgeCoords2D), (arg("src")));
 }
 
 
