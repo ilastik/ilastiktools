@@ -418,6 +418,22 @@ typedef std::unordered_map<edge_id_t,
 
 typedef std::pair<edge_coord_lookup_t, edge_coord_lookup_t> edge_coord_lookup_pair_t;
 
+//*****************************************************************************
+//* Given a 2D label image, find all the coordinates just *before* a label
+//* transition in both the x and y directions.
+//*
+//* Returns a pair of mappings of edge pairs (u,v) to coordinate lists; one for
+//* edges in the horizontal direction, and another for the vertical direction.
+//*
+//* For every edge pair (u,v): u < v.
+//* No ordering guarantee is made for the coordinate lists (but in practice,
+//* they will be in scan order).
+//*
+//* As a convenience, every key in the horizontal lookup is guaranteed to exist
+//* in the vertical lookup (and vice-versa), even if that key's coordinate list
+//* is empty.
+//*
+//*****************************************************************************
 edge_coord_lookup_pair_t edgeCoords2D( MultiArrayView<2, UInt32> const & src )
 {
     using namespace vigra;
@@ -489,6 +505,11 @@ edge_coord_lookup_pair_t edgeCoords2D( MultiArrayView<2, UInt32> const & src )
     return std::make_pair(horizontal_edge_coords, vertical_edge_coords);
 }
 
+//*****************************************************************************
+//* Convert an edge_coord_lookup_t to a corresponding python structure.
+//* Result is a dict of { tuple : list-of-tuple }, like this:
+//*   { (u,v) : [(x,y), (x,y), (x,y), ...] }
+//*****************************************************************************
 python::dict edgeCoordLookupToPython( edge_coord_lookup_t const & edge_coord_lookup )
 {
     namespace py = boost::python;
@@ -509,6 +530,10 @@ python::dict edgeCoordLookupToPython( edge_coord_lookup_t const & edge_coord_loo
     return pylookup;
 }
 
+//*****************************************************************************
+//* Python function for edgeCoords2D().
+//* See edgeCoords2D() documentation for details.
+//*****************************************************************************
 python::tuple pythonEdgeCoords2D(NumpyArray<2, UInt32> const & src)
 {
     edge_coord_lookup_pair_t lookup_pair;
@@ -523,12 +548,32 @@ python::tuple pythonEdgeCoords2D(NumpyArray<2, UInt32> const & src)
 }
 
 
+//*****************************************************************************
+//* Find all the label transitions for the given 2D label image.
+//* Then return a dict-of-lists mapping each edge (u,v) to a list of line
+//* segments that could be drawn on screen to represent the edge.
+//*
+//* Conceptually, the output looks like this:
+//*
+//* { (u,v) : [ ((x1,y1), (x2,y2)),
+//*             ((x1,y1), (x2,y2)),
+//*             ((x1,y1), (x2,y2)),
+//*             ... ] }
+//*
+//* ...but the line segment list is returned as a NumpyArray of shape (N,2,2).
+//*
+//* Note: The line segments are not guaranteed to appear in any particular order.
+//*
+//* TODO: It would be nice if we could use PyAllowThreads here, but I'm not
+//*       sure if it's allowed -- we create NumpyArrays inside the loop
+//*       (of type line_segment_array_t) inside the loop.
+//*
+//*****************************************************************************
 python::dict line_segments_for_labels( NumpyArray<2, UInt32> label_img )
 {
     typedef NumpyArray<3, UInt32> line_segment_array_t;
     typedef std::unordered_map<edge_id_t, line_segment_array_t, boost::hash<edge_id_t> > line_segment_lookup_t;
 
-    namespace py = boost::python;
     auto lookup_pair = edgeCoords2D(label_img);
     auto const & horizontal_coord_lookup = lookup_pair.first;
     auto const & vertical_coord_lookup = lookup_pair.second;
@@ -565,11 +610,11 @@ python::dict line_segments_for_labels( NumpyArray<2, UInt32> label_img )
             vertical_edge_coords = iter_vertical_coords->second;
         }
 
-        // Create line segments to the RIGHT of the edge coordinate
         auto num_segments = horizontal_edge_coords.size() + vertical_edge_coords.size();
         line_seg_lookup[edge_id] = line_segment_array_t(Shape3(num_segments, 2, 2));
         auto line_segments = line_seg_lookup[edge_id];
 
+        // Line segments to the RIGHT of the HORIZONTAL edge coordinates
         for ( int i = 0; i < horizontal_edge_coords.size(); ++i )
         {
             line_segments(i, 0, 0) = horizontal_edge_coords[i][0] + 1;
@@ -577,6 +622,7 @@ python::dict line_segments_for_labels( NumpyArray<2, UInt32> label_img )
             line_segments(i, 1, 0) = horizontal_edge_coords[i][0] + 1;
             line_segments(i, 1, 1) = horizontal_edge_coords[i][1] + 1;
         }
+        // Line segments BELOW the VERTICAL edge coordinates
         auto offset = horizontal_edge_coords.size();
         for ( int i = 0; i < vertical_edge_coords.size(); ++i )
         {
@@ -587,8 +633,9 @@ python::dict line_segments_for_labels( NumpyArray<2, UInt32> label_img )
         }
     }
 
+    namespace py = boost::python;
     py::dict ret;
-    for ( auto & k_v : line_seg_lookup )
+    for ( auto const & k_v : line_seg_lookup )
     {
         auto const & edge_id = k_v.first;
         ret[py::make_tuple(edge_id.first, edge_id.second)] = k_v.second;
