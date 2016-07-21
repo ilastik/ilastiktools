@@ -468,6 +468,24 @@ edge_coord_lookup_pair_t edgeCoords2D( MultiArrayView<2, UInt32> const & src )
             }
         }
     }
+
+    // Convenience feature:
+    // Ensure that every pair (u,v) in horizontal_edge_coords appears in vertical_edge_coords
+    // and vice-versa, even if it maps to an empty coordinate list in one of them.
+    auto fill_missing_keys =
+    [](edge_coord_lookup_t const & from, edge_coord_lookup_t & to)
+    {
+        for ( auto const & k_v : from )
+        {
+            if ( to.find(k_v.first) == to.end() )
+            {
+                to[k_v.first] = std::vector<Shape2>();
+            }
+        }
+    };
+    fill_missing_keys(horizontal_edge_coords, vertical_edge_coords);
+    fill_missing_keys(vertical_edge_coords, horizontal_edge_coords);
+
     return std::make_pair(horizontal_edge_coords, vertical_edge_coords);
 }
 
