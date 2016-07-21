@@ -511,8 +511,12 @@ python::dict edgeCoordLookupToPython( edge_coord_lookup_t const & edge_coord_loo
 
 python::tuple pythonEdgeCoords2D(NumpyArray<2, UInt32> const & src)
 {
+    edge_coord_lookup_pair_t lookup_pair;
+    {
+        PyAllowThreads _pythread;
+        lookup_pair = edgeCoords2D(src); // C++ move constructor should work here ...right?
+    }
     namespace py = boost::python;
-    auto lookup_pair = edgeCoords2D(src);
     py::dict pycoords_horizontal = edgeCoordLookupToPython(lookup_pair.first);
     py::dict pycoords_vertical = edgeCoordLookupToPython(lookup_pair.second);
     return py::make_tuple( pycoords_horizontal, pycoords_vertical );
