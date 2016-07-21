@@ -36,9 +36,15 @@
 #define PY_ARRAY_UNIQUE_SYMBOL vigranumpyilastiktools_PyArray_API
 //#define NO_IMPORT_ARRAY
 
+#include <utility>
+#include <vector>
+#include <unordered_set>
+#include <unordered_map>
+
 // Include this first to avoid name conflicts for boost::tie,
 // similar to issue described in vigra#237
 #include <boost/tuple/tuple.hpp>
+#include <boost/functional/hash.hpp>
 
 /*vigra*/
 #include <ilastiktools/carving.hxx>
@@ -403,7 +409,239 @@ void defineGridSegmentor(const std::string & clsName){
     ;
 }
 
+// Define lookup type:
+// (u,v) -> [(x,y), (x,y),...]
+typedef std::pair<UInt32, UInt32> edge_id_t;
+typedef std::unordered_map<edge_id_t,
+                           std::vector<Shape2>,
+                           boost::hash<edge_id_t> > edge_coord_lookup_t;
 
+typedef std::pair<edge_coord_lookup_t, edge_coord_lookup_t> edge_coord_lookup_pair_t;
+
+//*****************************************************************************
+//* Given a 2D label image, find all the coordinates just *before* a label
+//* transition in both the x and y directions.
+//*
+//* Returns a pair of mappings of edge pairs (u,v) to coordinate lists; one for
+//* edges in the horizontal direction, and another for the vertical direction.
+//*
+//* For every edge pair (u,v): u < v.
+//* No ordering guarantee is made for the coordinate lists (but in practice,
+//* they will be in scan order).
+//*
+//* As a convenience, every key in the horizontal lookup is guaranteed to exist
+//* in the vertical lookup (and vice-versa), even if that key's coordinate list
+//* is empty.
+//*
+//*****************************************************************************
+edge_coord_lookup_pair_t edgeCoords2D( MultiArrayView<2, UInt32> const & src )
+{
+    using namespace vigra;
+    MultiArrayIndex x_dim = src.shape(0);
+    MultiArrayIndex y_dim = src.shape(1);
+
+    edge_coord_lookup_t horizontal_edge_coords;
+    edge_coord_lookup_t vertical_edge_coords;
+
+    for (MultiArrayIndex y = 0; y < y_dim; ++y)
+    {
+        for (MultiArrayIndex x = 0; x < x_dim; ++x)
+        {
+            // Lambda to append to a lookup
+            auto append_to_lookup =
+            [&](edge_coord_lookup_t & lookup, MultiArrayIndex x1, MultiArrayIndex y1)
+            {
+                auto u = src(x,y);
+                auto v = src(x1,y1);
+                edge_id_t edge_id = (u < v) ? std::make_pair(u,v) : std::make_pair(v,u);
+
+                auto iter = lookup.find(edge_id);
+                if ( iter == lookup.end() )
+                {
+                    // Edge not yet seen. Create a new coord vector
+                    auto coord_list = std::vector<Shape2>();
+                    coord_list.push_back(Shape2(x,y));
+                    lookup[edge_id] = coord_list;
+                }
+                else
+                {
+                    // Append to coord vector
+                    auto & coord_list = iter->second;
+                    coord_list.push_back(Shape2(x,y));
+                }
+            };
+
+            // Check to the right
+            if (x < x_dim-1 && src(x,y) != src(x+1,y))
+            {
+                append_to_lookup(horizontal_edge_coords, x+1, y);
+            }
+
+            // Check below
+            if (y < y_dim-1 && src(x,y) != src(x,y+1))
+            {
+                append_to_lookup(vertical_edge_coords, x, y+1);
+            }
+        }
+    }
+
+    // Convenience feature:
+    // Ensure that every pair (u,v) in horizontal_edge_coords appears in vertical_edge_coords
+    // and vice-versa, even if it maps to an empty coordinate list in one of them.
+    auto fill_missing_keys =
+    [](edge_coord_lookup_t const & from, edge_coord_lookup_t & to)
+    {
+        for ( auto const & k_v : from )
+        {
+            if ( to.find(k_v.first) == to.end() )
+            {
+                to[k_v.first] = std::vector<Shape2>();
+            }
+        }
+    };
+    fill_missing_keys(horizontal_edge_coords, vertical_edge_coords);
+    fill_missing_keys(vertical_edge_coords, horizontal_edge_coords);
+
+    return std::make_pair(horizontal_edge_coords, vertical_edge_coords);
+}
+
+//*****************************************************************************
+//* Convert an edge_coord_lookup_t to a corresponding python structure.
+//* Result is a dict of { tuple : list-of-tuple }, like this:
+//*   { (u,v) : [(x,y), (x,y), (x,y), ...] }
+//*****************************************************************************
+python::dict edgeCoordLookupToPython( edge_coord_lookup_t const & edge_coord_lookup )
+{
+    namespace py = boost::python;
+
+    py::dict pylookup;
+    for ( auto & edge_and_coords : edge_coord_lookup )
+    {
+        edge_id_t const & edge_id = edge_and_coords.first;
+        std::vector<Shape2> const & coords = edge_and_coords.second;
+
+        py::list pycoords;
+        for ( auto coord : coords )
+        {
+            pycoords.append(py::make_tuple(coord[0], coord[1]));
+        }
+        pylookup[py::make_tuple(edge_id.first, edge_id.second)] = pycoords;
+    }
+    return pylookup;
+}
+
+//*****************************************************************************
+//* Python function for edgeCoords2D().
+//* See edgeCoords2D() documentation for details.
+//*****************************************************************************
+python::tuple pythonEdgeCoords2D(NumpyArray<2, UInt32> const & src)
+{
+    edge_coord_lookup_pair_t lookup_pair;
+    {
+        PyAllowThreads _pythread;
+        lookup_pair = edgeCoords2D(src); // C++ move constructor should work here ...right?
+    }
+    namespace py = boost::python;
+    py::dict pycoords_horizontal = edgeCoordLookupToPython(lookup_pair.first);
+    py::dict pycoords_vertical = edgeCoordLookupToPython(lookup_pair.second);
+    return py::make_tuple( pycoords_horizontal, pycoords_vertical );
+}
+
+
+//*****************************************************************************
+//* Find all the label transitions for the given 2D label image.
+//* Then return a dict-of-lists mapping each edge (u,v) to a list of line
+//* segments that could be drawn on screen to represent the edge.
+//*
+//* Conceptually, the output looks like this:
+//*
+//* { (u,v) : [ ((x1,y1), (x2,y2)),
+//*             ((x1,y1), (x2,y2)),
+//*             ((x1,y1), (x2,y2)),
+//*             ... ] }
+//*
+//* ...but the line segment list is returned as a NumpyArray of shape (N,2,2).
+//*
+//* Note: The line segments are not guaranteed to appear in any particular order.
+//*
+//* TODO: It would be nice if we could use PyAllowThreads here, but I'm not
+//*       sure if it's allowed -- we create NumpyArrays inside the loop
+//*       (of type line_segment_array_t) inside the loop.
+//*
+//*****************************************************************************
+python::dict line_segments_for_labels( NumpyArray<2, UInt32> label_img )
+{
+    typedef NumpyArray<3, UInt32> line_segment_array_t;
+    typedef std::unordered_map<edge_id_t, line_segment_array_t, boost::hash<edge_id_t> > line_segment_lookup_t;
+
+    auto lookup_pair = edgeCoords2D(label_img);
+    auto const & horizontal_coord_lookup = lookup_pair.first;
+    auto const & vertical_coord_lookup = lookup_pair.second;
+
+    typedef std::unordered_set<edge_id_t, boost::hash<edge_id_t> > edge_id_set_t;
+    edge_id_set_t all_edge_ids;
+    for ( auto const & k_v : horizontal_coord_lookup )
+    {
+        all_edge_ids.insert(k_v.first);
+    }
+    for ( auto const & k_v : vertical_coord_lookup )
+    {
+        all_edge_ids.insert(k_v.first);
+    }
+
+    line_segment_lookup_t line_seg_lookup;
+    for ( auto const & edge_id : all_edge_ids )
+    {
+        // Empty by default
+        std::vector<Shape2> horizontal_edge_coords;
+        std::vector<Shape2> vertical_edge_coords;
+
+        // Overwrite if found
+        auto iter_horizontal_coords = horizontal_coord_lookup.find(edge_id);
+        if ( iter_horizontal_coords != horizontal_coord_lookup.end() )
+        {
+            horizontal_edge_coords = iter_horizontal_coords->second;
+        }
+
+        // Overwrite if found
+        auto iter_vertical_coords = vertical_coord_lookup.find(edge_id);
+        if ( iter_vertical_coords != vertical_coord_lookup.end() )
+        {
+            vertical_edge_coords = iter_vertical_coords->second;
+        }
+
+        auto num_segments = horizontal_edge_coords.size() + vertical_edge_coords.size();
+        line_seg_lookup[edge_id] = line_segment_array_t(Shape3(num_segments, 2, 2));
+        auto line_segments = line_seg_lookup[edge_id];
+
+        // Line segments to the RIGHT of the HORIZONTAL edge coordinates
+        for ( int i = 0; i < horizontal_edge_coords.size(); ++i )
+        {
+            line_segments(i, 0, 0) = horizontal_edge_coords[i][0] + 1;
+            line_segments(i, 0, 1) = horizontal_edge_coords[i][1] + 0;
+            line_segments(i, 1, 0) = horizontal_edge_coords[i][0] + 1;
+            line_segments(i, 1, 1) = horizontal_edge_coords[i][1] + 1;
+        }
+        // Line segments BELOW the VERTICAL edge coordinates
+        auto offset = horizontal_edge_coords.size();
+        for ( int i = 0; i < vertical_edge_coords.size(); ++i )
+        {
+            line_segments(offset+i, 0, 0) = vertical_edge_coords[i][0] + 0;
+            line_segments(offset+i, 0, 1) = vertical_edge_coords[i][1] + 1;
+            line_segments(offset+i, 1, 0) = vertical_edge_coords[i][0] + 1;
+            line_segments(offset+i, 1, 1) = vertical_edge_coords[i][1] + 1;
+        }
+    }
+
+    namespace py = boost::python;
+    py::dict ret;
+    for ( auto const & k_v : line_seg_lookup )
+    {
+        auto const & edge_id = k_v.first;
+        ret[py::make_tuple(edge_id.first, edge_id.second)] = k_v.second;
+    }
+    return ret;
+}
 
 
 
@@ -421,6 +659,9 @@ BOOST_PYTHON_MODULE_INIT(_core)
     defineGridRag<3, vigra::UInt32>("GridRag_3D_UInt32");
     defineGridSegmentor<3, vigra::UInt32>("GridSegmentor_3D_UInt32");
 
+    using namespace boost::python;
+    def("edgeCoords2D", registerConverters(&pythonEdgeCoords2D), (arg("src")));
+    def("line_segments_for_labels", registerConverters(&line_segments_for_labels), (arg("label_img")));
 }
 
 
