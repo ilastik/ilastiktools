@@ -21,14 +21,13 @@ build:
 requirements:
   build:
     - gcc 4.8.5 # [linux]
-    - gcc 4.8.5 # [osx]
     - python 2.7*|3.5*
     - python {{PY_VER}}*
     - numpy {{NPY_VER}}*
     - vigra 1.11*
 
   run:
-    - libgcc 4.8.5
+    - libgcc 4.8.5 # [linux]
     - python {{PY_VER}}*
     - numpy  {{NPY_VER}}*
     - vigra 1.11*
