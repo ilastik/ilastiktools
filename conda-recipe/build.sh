@@ -11,6 +11,10 @@ fi
 
 ILASTIKTOOLS_CXXFLAGS="${CFLAGS} -std=c++11"
 
+PY_VER=$(python -c "import sys; print('{}.{}'.format(*sys.version_info[:2]))")
+PY_ABIFLAGS=$(python -c "import sys; print('' if sys.version_info.major == 2 else sys.abiflags)")
+PY_ABI=${PY_VER}${PY_ABIFLAGS}
+
 mkdir build
 cd build
 cmake ..\
@@ -20,11 +24,11 @@ cmake ..\
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
     -DCMAKE_PREFIX_PATH=${PREFIX} \
     -DPYTHON_EXECUTABLE=${PYTHON} \
-    -DPYTHON_LIBRARY=${PREFIX}/lib/libpython2.7.${DYLIB_EXT} \
-    -DPYTHON_INCLUDE_DIR=${PREFIX}/include/python2.7 \
+    -DPYTHON_LIBRARY=${PREFIX}/lib/libpython${PY_ABI}.${DYLIB_EXT} \
+    -DPYTHON_INCLUDE_DIR=${PREFIX}/include/python${PY_ABI} \
     -DVIGRA_INCLUDE_DIR=${PREFIX}/include \
     -DVIGRA_IMPEX_LIBRARY=${PREFIX}/lib/libvigraimpex.${DYLIB_EXT} \
-    -DVIGRA_NUMPY_CORE_LIBRARY=${PREFIX}/lib/python2.7/site-packages/vigra/vigranumpycore.so \
+    -DVIGRA_NUMPY_CORE_LIBRARY=${SP_DIR}/vigra/vigranumpycore.so \
     -DWITH_OPENMP=ON \
 ##
 
