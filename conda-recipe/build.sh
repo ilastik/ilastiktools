@@ -3,7 +3,7 @@ export CFLAGS=""
 export LDFLAGS=""
 
 # Depending on our platform, shared libraries end with either .so or .dylib
-if [[ `uname` == 'Darwin' ]]; then
+if [[ $(uname) == 'Darwin' ]]; then
     DYLIB_EXT=dylib
     CC=clang
     CXX=clang++
