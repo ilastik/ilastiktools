@@ -15,6 +15,9 @@ build:
   #
   # You must build this recipe using 'conda build --numpy=X.Y'
   #
+  features:
+    - vc14 # [win]
+  msvc_compiler: 14.0 # [win]
   number: 0
   string: np{{np}}py{{py}}_{{PKG_BUILDNUM}}_g{{GIT_FULL_HASH[:7]}}
 
