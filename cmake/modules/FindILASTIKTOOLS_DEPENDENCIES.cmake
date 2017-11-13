@@ -38,11 +38,6 @@ ELSE()
     MESSAGE(STATUS "Could NOT find Python libraries and/or includes")
 ENDIF()
 
-find_package(Boost COMPONENTS python REQUIRED)
-if("${Boost_PYTHON_LIBRARY}" MATCHES "boost_python\\.lib")
-    ADD_DEFINITIONS(-DBOOST_AUTO_LINK_NOMANGLE)
-endif()
-
 ######################################################################
 #
 #      find default install directory for Python modules
@@ -61,62 +56,7 @@ SET(PYTHON_SITE_PACKAGES ${PYTHON_SITE_PACKAGES}
 # use this in INSTALL() commands to get packaging right
 FILE(RELATIVE_PATH PYTHON_SITE_PACKAGES ${CMAKE_INSTALL_PREFIX} ${PYTHON_SITE_PACKAGES})
 
-######################################################################
-#
-#      find numpy include directory
-#      (usually below PYTHONDIR/Lib/site-packages/numpy)
-#
-######################################################################
-IF(NOT PYTHON_NUMPY_INCLUDE_DIR)
-    # Note: we must suppress possible output of the 'from numpy... import *' command,
-    #       because the output cannot be interpreted correctly otherwise
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-                     "import sys, os; sys.stdout = open(os.devnull, 'w'); from numpy.distutils.misc_util import *; sys.__stdout__.write(' '.join(get_numpy_include_dirs()))"
-                      RESULT_VARIABLE PYTHON_NUMPY_NOT_FOUND
-                      OUTPUT_VARIABLE PYTHON_NUMPY_INCLUDE_DIR
-                      OUTPUT_STRIP_TRAILING_WHITESPACE)
-    IF(NOT PYTHON_NUMPY_NOT_FOUND)
-        FILE(TO_CMAKE_PATH ${PYTHON_NUMPY_INCLUDE_DIR} PYTHON_NUMPY_INCLUDE_DIR)
-    ELSE()
-        SET(PYTHON_NUMPY_INCLUDE_DIR "PYTHON_NUMPY_INCLUDE_DIR-NOTFOUND")
-    ENDIF()
-ENDIF()
 
-SET(PYTHON_NUMPY_INCLUDE_DIR ${PYTHON_NUMPY_INCLUDE_DIR}
-    CACHE PATH "Path to numpy include files" FORCE)
-IF(PYTHON_NUMPY_INCLUDE_DIR)
-    MESSAGE(STATUS "Searching for Python numpy: ok")
-ELSE()
-    MESSAGE(STATUS "Could NOT find Python numpy ('import numpy.distutils.misc_util' failed)")
-ENDIF()
-
-######################################################################
-#
-#      check if nosetests are installed
-#
-######################################################################
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-                 "import nose"
-                  RESULT_VARIABLE PYTHON_NOSETESTS_NOT_FOUND)
-
-IF(NOT PYTHON_NOSETESTS_NOT_FOUND)
-    MESSAGE(STATUS "Searching for Python nosetests: ok")
-ELSE()
-    MESSAGE(STATUS "Could NOT find Python nosetests ('import nose' failed)")
-ENDIF()
-
-######################################################################
-#
-#      check if sphinx documentation generator is installed
-#
-######################################################################
-find_program(PYTHON_SPHINX sphinx-build "${PYTHON_PREFIX}/Scripts")
-
-IF(NOT PYTHON_SPHINX)
-    MESSAGE(STATUS "Could NOT find sphinx documentation generator")
-ELSE()
-    MESSAGE(STATUS "Searching for sphinx documentation generator: ok")
-ENDIF()
 
 ######################################################################
 #

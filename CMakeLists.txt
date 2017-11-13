@@ -14,8 +14,6 @@ ENDIF()
 cmake_minimum_required(VERSION 2.6)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
-include(ILASTIKTOOLS_ADD_NUMPY_MODULE)
-
 project(ilastiktools)
 set (ILASTIKTOOLS_VERSION_MAJOR 0)
 set (ILASTIKTOOLS_VERSION_MINOR 2)
@@ -33,17 +31,11 @@ file(GLOB_RECURSE headers include/*.hxx)
 file(GLOB_RECURSE headers ${CMAKE_INSTALL_PREFIX}/include/*.hxx)
 include_directories(include)
 
-# If libboost_python.so and libboost_python-mt.so exist on the same machine,
-#  we can get into trouble if we don't link against the same version that vigra used.
-#  (vigra uses the version without -mt)
-# set(Boost_USE_MULTITHREADED OFF)
 
 FIND_PACKAGE(VIGRA REQUIRED)
 include_directories(${VIGRA_INCLUDE_DIR})
 
 FIND_PACKAGE(Threads REQUIRED)  # includes pthread
-include(FindILASTIKTOOLS_DEPENDENCIES) # search for python, numpy, boost_python
-include_directories(${ILASTIKTOOLS_INCLUDE_DIRS})
 
 #--------------------------------------------------------
 # OpenMP
@@ -62,4 +54,5 @@ endif(WITH_OPENMP)
 #--------------------------------------------------------
 # source directory
 #--------------------------------------------------------
+add_subdirectory(ext/pybind11)
 add_subdirectory(src)
