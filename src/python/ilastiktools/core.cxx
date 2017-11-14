@@ -147,13 +147,21 @@ py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyGetSegmentation(
     const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor,
     const py::array_t<MultiArrayIndex, py::array::f_style | py::array::forcecast> pyRoiBegin,
     const py::array_t<MultiArrayIndex, py::array::f_style | py::array::forcecast> pyRoiEnd,
-    py::array_t<UInt8, py::array::f_style | py::array::forcecast>& pySegmentation
+    py::array_t<UInt8, py::array::f_style | py::array::forcecast>* pySegmentation
 ){
-    auto segmentation = numpy_to_vigra<DIM, UInt8>(pySegmentation);
     auto roiBegin = numpy_to_tiny_vector<DIM, MultiArrayIndex>(pyRoiBegin);
     auto roiEnd = numpy_to_tiny_vector<DIM, MultiArrayIndex>(pyRoiEnd);
-    if(segmentation.size() == 0)
-        segmentation = MultiArray<DIM, UInt8>(roiEnd - roiBegin);
+
+    MultiArrayView<DIM, UInt8> segmentation;
+    if(pySegmentation == nullptr)
+         segmentation = MultiArray<DIM, UInt8>(roiEnd - roiBegin);
+    else
+        segmentation = numpy_to_vigra<DIM, UInt8>(*pySegmentation);
+
+    if(segmentation.shape() != roiEnd - roiBegin)
+    {
+        throw std::invalid_argument("Dimensions must match!");
+    }
 
     {
         pybind11::gil_scoped_release release;
@@ -166,12 +174,9 @@ py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyGetSegmentation(
 
 template<unsigned int DIM, class LABEL_TYPE>
 py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyGetSuperVoxelSeg(
-    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor,
-    py::array_t<UInt8, py::array::f_style | py::array::forcecast>& pySegmentation
+    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor
 ){
-    auto segmentation = numpy_to_vigra<1, UInt8>(pySegmentation);
-    if(segmentation.size() == 0)
-        segmentation = MultiArray<1, UInt8>(gridSegmentor.maxNodeId()+1);
+    auto segmentation = MultiArray<1, UInt8>(gridSegmentor.maxNodeId()+1);
     
     {
         pybind11::gil_scoped_release release;
@@ -183,12 +188,9 @@ py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyGetSuperVoxelSeg
 
 template<unsigned int DIM, class LABEL_TYPE>
 py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyGetSuperVoxelSeeds(
-    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor,
-    py::array_t<UInt8, py::array::f_style | py::array::forcecast>& pySeeds
+    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor
 ){
-    auto seeds = numpy_to_vigra<1, UInt8>(pySeeds);
-    if(seeds.size() == 0)
-        seeds = MultiArray<1, UInt8>(gridSegmentor.maxNodeId()+1);
+    auto seeds = MultiArray<1, UInt8>(gridSegmentor.maxNodeId()+1);
 
     {
         pybind11::gil_scoped_release release;
@@ -202,12 +204,19 @@ py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyGetSuperVoxelSee
 template<unsigned int DIM, class LABEL_TYPE>
 py::array_t<UInt32, py::array::f_style | py::array::forcecast> pySerializeGraph(
     const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor,
-    py::array_t<UInt32, py::array::f_style | py::array::forcecast>& pySerialization 
+    py::array_t<UInt32, py::array::f_style | py::array::forcecast>* pySerialization 
 ){
-    auto serialization = numpy_to_vigra<1, UInt32>(pySerialization);
-    if(serialization.size() == 0)
-        serialization = MultiArray<1, UInt32>(gridSegmentor.graph().serializationSize());
-    
+    MultiArrayView<1, UInt32> serialization;
+    if(pySerialization == nullptr)
+         serialization = MultiArray<1, UInt32>(gridSegmentor.graph().serializationSize());
+    else
+        serialization = numpy_to_vigra<1, UInt32>(*pySerialization);
+
+    if(serialization.size() != gridSegmentor.graph().serializationSize())
+    {
+        throw std::invalid_argument("Dimensions must match!");
+    }
+
     gridSegmentor.graph().serialize(serialization.begin());
     return vigra_to_numpy<1, UInt32>(serialization);
 }
@@ -227,12 +236,9 @@ void pyDeserializeGraph(
 
 template<unsigned int DIM, class LABEL_TYPE>
 py::array_t<float, py::array::f_style | py::array::forcecast> pyEdgeWeights(
-    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor,
-    py::array_t<float, py::array::f_style | py::array::forcecast>& pyOut
+    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor
 ){
-    auto out = numpy_to_vigra<1, float>(pyOut);
-    if(out.size() == 0)
-        out = MultiArray<1, float>(gridSegmentor.edgeNum());
+    auto out = MultiArray<1, float>(gridSegmentor.edgeNum());
     
     out = gridSegmentor.edgeWeights();
     return vigra_to_numpy<1, float>(out);
@@ -240,12 +246,9 @@ py::array_t<float, py::array::f_style | py::array::forcecast> pyEdgeWeights(
 
 template<unsigned int DIM, class LABEL_TYPE>
 py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyNodeSeeds(
-    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor,
-    py::array_t<UInt8, py::array::f_style | py::array::forcecast>& pyOut
+    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor
 ){
-    auto out = numpy_to_vigra<1, UInt8>(pyOut);
-    if(out.size() == 0)
-        out = MultiArray<1, UInt8>(gridSegmentor.maxNodeId()+1);
+    auto out = MultiArray<1, UInt8>(gridSegmentor.maxNodeId()+1);
     
     out = gridSegmentor.nodeSeeds();
     return vigra_to_numpy<1, UInt8>(out);
@@ -253,12 +256,9 @@ py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyNodeSeeds(
 
 template<unsigned int DIM, class LABEL_TYPE>
 py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyGetResultSegmentation(
-    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor,
-    py::array_t<UInt8, py::array::f_style | py::array::forcecast>& pyOut
+    const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor
 ){
-    auto out = numpy_to_vigra<1, UInt8>(pyOut);
-    if(out.size() == 0)
-        out = MultiArray<1, UInt8>(gridSegmentor.maxNodeId()+1);
+    auto out = MultiArray<1, UInt8>(gridSegmentor.maxNodeId()+1);
 
     out = gridSegmentor.resultSegmentation();
     return vigra_to_numpy<1, UInt8>(out);
@@ -294,7 +294,9 @@ void defineGridRag(py::module& module, const std::string & clsName){
     py::class_<Graph>(module, clsName.c_str())
         .def(py::init< >())
         .def("assignLabels",&pyAssignLabels<DIM, LABEL_TYPE>)
-        .def("accumulateEdgeFeatures", &pyAccumulateEdgeFeatures<DIM, LABEL_TYPE, float>, py::arg("features"), py::arg("out") = py::object())
+        .def("accumulateEdgeFeatures", &pyAccumulateEdgeFeatures<DIM, LABEL_TYPE, float>, 
+            py::arg("features"), 
+            py::arg("out").none(false))
     ;
 }
 
@@ -339,7 +341,17 @@ void defineGridSegmentor(py::module& module, const std::string & clsName){
              & pyGetSegmentation<DIM, LABEL_TYPE>,
                 py::arg("roiBegin"),
                 py::arg("roiEnd"),
-                py::arg("out") = py::object()
+                py::arg("out").none(false)
+        )
+        .def("getSegmentation", 
+            [](const GridSegmentor<DIM , LABEL_TYPE, float> &g,
+               const py::array_t<MultiArrayIndex, py::array::f_style | py::array::forcecast> roiBegin,
+               const py::array_t<MultiArrayIndex, py::array::f_style | py::array::forcecast> roiEnd)
+               ->py::array_t<UInt8, py::array::f_style | py::array::forcecast>{ 
+                    return pyGetSegmentation<DIM, LABEL_TYPE>(g, roiBegin, roiEnd, nullptr);
+            },
+            py::arg("roiBegin"),
+            py::arg("roiEnd")
         )
         .def("nodeNum",&Segmentor::nodeNum)
         .def("edgeNum",&Segmentor::edgeNum)
@@ -348,27 +360,14 @@ void defineGridSegmentor(py::module& module, const std::string & clsName){
         .def("run",&Segmentor::run)
         .def("clearSeeds",&Segmentor::clearSeeds)
         .def("clearSegmentation",&Segmentor::clearSegmentation)
-        .def("serializeGraph", &pySerializeGraph<DIM, LABEL_TYPE>,
-                py::arg("out") = py::object()
-        )
-        .def("deserializeGraph", &pyDeserializeGraph<DIM, LABEL_TYPE>,
-                py::arg("serialization")
-        )
-        .def("getEdgeWeights",pyEdgeWeights<DIM, LABEL_TYPE>,
-                py::arg("out") = py::object()
-        )
-        .def("getNodeSeeds",pyNodeSeeds<DIM, LABEL_TYPE>,
-                py::arg("out") = py::object()
-        )
-        .def("getResultSegmentation",pyGetResultSegmentation<DIM, LABEL_TYPE>,
-                py::arg("out") = py::object()
-        )
-        .def("getSuperVoxelSeg",pyGetSuperVoxelSeg<DIM, LABEL_TYPE>,
-                py::arg("out") = py::object()
-        )
-        .def("getSuperVoxelSeeds",pyGetSuperVoxelSeeds<DIM, LABEL_TYPE>,
-                py::arg("out") = py::object()
-        )
+        .def("serializeGraph", &pySerializeGraph<DIM, LABEL_TYPE>, py::arg("out").none(false))
+        .def("serializeGraph", [](const GridSegmentor<DIM , LABEL_TYPE, float> &g)->py::array_t<UInt32, py::array::f_style | py::array::forcecast>{ return pySerializeGraph<DIM, LABEL_TYPE>(g, nullptr);})
+        .def("deserializeGraph", &pyDeserializeGraph<DIM, LABEL_TYPE>, py::arg("serialization"))
+        .def("getEdgeWeights",pyEdgeWeights<DIM, LABEL_TYPE>)
+        .def("getNodeSeeds",pyNodeSeeds<DIM, LABEL_TYPE>)
+        .def("getResultSegmentation",pyGetResultSegmentation<DIM, LABEL_TYPE>)
+        .def("getSuperVoxelSeg",pyGetSuperVoxelSeg<DIM, LABEL_TYPE>)
+        .def("getSuperVoxelSeeds",pyGetSuperVoxelSeeds<DIM, LABEL_TYPE>)
     ;
 }
 
