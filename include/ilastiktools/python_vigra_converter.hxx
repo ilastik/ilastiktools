@@ -38,7 +38,7 @@ vigra::MultiArrayView<DIM, DTYPE> numpy_to_vigra(pybind11::array_t<DTYPE, pybind
     */
 
     if(info.ndim != DIM)
-        throw std::runtime_error("Dimension mismatch between function and argument");
+        throw std::invalid_argument("Dimension mismatch between function and argument");
 
     vigra::TinyVector<int64_t, DIM> shape;
     vigra::TinyVector<int64_t, DIM> strides;
@@ -77,7 +77,7 @@ const vigra::TinyVector<DTYPE, DIM> numpy_to_tiny_vector(pybind11::array_t<DTYPE
     pybind11::buffer_info info = py_array.request();
 
     if(info.ndim != 1)
-        throw std::runtime_error("Can only convert vectors!");
+        throw std::invalid_argument("Can only convert vectors!");
     if(info.shape[0] != DIM)
         throw std::runtime_error(std::string("Wrong number of elements in vector! Expected ") + std::to_string(DIM)
                                  + std::string(" got ") + std::to_string(info.shape[0]));
