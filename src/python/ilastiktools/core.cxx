@@ -40,6 +40,7 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
+#include <assert>
 
 // Include this first to avoid name conflicts for boost::tie,
 // similar to issue described in vigra#237
@@ -60,6 +61,40 @@
 namespace py = pybind11;
 using namespace vigra;
 
+
+bool checkSerializationValidity(const MultiArrayView<1, UInt32>& serialization)
+{
+    if(serialization.size() < 4)
+        throw std::invalid_argument("Need at least 4 values for deserialization");
+
+    auto nodeNum = serialization(0);
+    auto edgeNum = serialization(1);
+    auto maxNodeId = serialization(2);
+    auto maxEdgeId = serialization(3);
+
+    std::cout << "Found graph that should have " << nodeNum << " nodes and " << edgeNum << " edges, with maxIds: " << maxNodeId << ", " << maxEdgeId << std::endl;
+    std::cout << "checking node degrees" << std::endl;
+
+    size_t sumOfNodeDegrees = 0;
+    const size_t offset = 4 + 2 * edgeNum + 1;
+    for(size_t i = 0; i < nodeNum; i++){
+        if(offset + 2*i + 2*sumOfNodeDegrees > serialization.size())
+            throw std::runtime_error("tried to access node definitions outside of the provided array for deserialization");
+        size_t nodeDegree = serialization(offset + 2*i + 2*sumOfNodeDegrees);
+        sumOfNodeDegrees += nodeDegree;
+    }
+
+    std::cout << "Total sum of node degrees is " << sumOfNodeDegrees << std::endl;
+
+
+    if(serialization.size() < 4 + 2* (nodeNum + edgeNum) + 2*sumOfNodeDegrees)
+    {
+        std::cerr << "Expected size of " << 4 + 2* (nodeNum + edgeNum) + 2*sumOfNodeDegrees << " but got " << serialization.size() << std::endl;
+        throw std::invalid_argument("Array for deserialization does not contain enough values!");
+    }
+
+    return true;
+}
 
 template<unsigned int DIM, class LABEL_TYPE>
 void pyAssignLabels(
@@ -121,6 +156,8 @@ void pyPreprocessingFromSerialization(
     auto edgeWeights = numpy_to_vigra<1, float>(pyEdgeWeights);
     auto nodeSeeds = numpy_to_vigra<1, UInt8>(pyNodeSeeds);
     auto resultSegmentation = numpy_to_vigra<1, UInt8>(pyResultSegmentation);
+
+    assert(checkSerializationValidity(serialization));
 
     gridSegmentor.preprocessingFromSerialization(labels, serialization,
                                                  edgeWeights, nodeSeeds,
@@ -227,11 +264,12 @@ void pyDeserializeGraph(
     const py::array_t<UInt32, py::array::f_style | py::array::forcecast>& pySerialization
 ){
     auto serialization = numpy_to_vigra<1, UInt32>(pySerialization);
+
+    assert(checkSerializationValidity(serialization));
+
     gridSegmentor.graph().clear();
     gridSegmentor.graph().deserialize(serialization.begin(),serialization.end());
 }
-
-
 
 
 template<unsigned int DIM, class LABEL_TYPE>

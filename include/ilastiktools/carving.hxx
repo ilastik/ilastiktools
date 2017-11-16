@@ -336,6 +336,13 @@ namespace vigra{
 
             // assign weights and seeds
             // and resultSegmentation
+            if(edgeWeights.shape() != Shape1(graph_.edgeNum()))
+                throw std::invalid_argument("Edge weights has wrong shape.");
+            if(nodeSeeds.shape() != Shape1(graph_.maxNodeId()+1))
+                throw std::invalid_argument("Node seeds has wrong shape.");
+            if(resultSegmentation.shape() != Shape1(graph_.maxNodeId()+1))
+                throw std::invalid_argument("Result Segmentation has wrong shape.");
+
             edgeWeights_ = edgeWeights;
             nodeSeeds_ = nodeSeeds;
             resultSegmentation_ = resultSegmentation;
