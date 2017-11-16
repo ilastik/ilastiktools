@@ -40,7 +40,7 @@
 #include <vector>
 #include <unordered_set>
 #include <unordered_map>
-#include <assert>
+#include <assert.h>
 
 // Include this first to avoid name conflicts for boost::tie,
 // similar to issue described in vigra#237
@@ -189,11 +189,28 @@ py::array_t<UInt8, py::array::f_style | py::array::forcecast> pyGetSegmentation(
     auto roiBegin = numpy_to_tiny_vector<DIM, MultiArrayIndex>(pyRoiBegin);
     auto roiEnd = numpy_to_tiny_vector<DIM, MultiArrayIndex>(pyRoiEnd);
 
+    for(unsigned int i = 0; i < DIM; i++)
+    {
+        if(roiEnd[i] <= roiBegin[i])
+            throw std::invalid_argument("Cannot get segmentation of ROI with invalid dimensions");
+    }
+
     MultiArrayView<DIM, UInt8> segmentation;
+    MultiArray<DIM, UInt8> segmentationMemoryHolder;
+
     if(pySegmentation == nullptr)
-         segmentation = MultiArray<DIM, UInt8>(roiEnd - roiBegin);
+    {
+        // If we directly assigned the MultiArray to the View, it would have been freed after leaving this scope.
+        // Thus the memoryHolder is defined above, but only filled if there was no input array.
+        segmentationMemoryHolder = MultiArray<DIM, UInt8>(roiEnd - roiBegin);
+        segmentation = segmentationMemoryHolder;
+    }
     else
+    {
+        // here we get a memoryView because pybind11 hands us the pointer to the data allocated by numpy/python,
+        // and we don't want to copy it
         segmentation = numpy_to_vigra<DIM, UInt8>(*pySegmentation);
+    }
 
     if(segmentation.shape() != roiEnd - roiBegin)
     {
@@ -243,9 +260,16 @@ py::array_t<UInt32, py::array::f_style | py::array::forcecast> pySerializeGraph(
     const GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor,
     py::array_t<UInt32, py::array::f_style | py::array::forcecast>* pySerialization 
 ){
+    if(gridSegmentor.graph().nodeNum() == 0)
+        throw std::runtime_error("Cannot serialize empty graph");
+
+    MultiArray<1, UInt32> serializationMemoryHolder;
     MultiArrayView<1, UInt32> serialization;
     if(pySerialization == nullptr)
-         serialization = MultiArray<1, UInt32>(gridSegmentor.graph().serializationSize());
+    {
+        serializationMemoryHolder = MultiArray<1, UInt32>(gridSegmentor.graph().serializationSize());
+        serialization = serializationMemoryHolder;
+    }
     else
         serialization = numpy_to_vigra<1, UInt32>(*pySerialization);
 
