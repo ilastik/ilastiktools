@@ -11,7 +11,7 @@ ENDIF()
 #----------------------------------------------------
 # ilastiktools
 #----------------------------------------------------
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
 project(ilastiktools)
@@ -54,5 +54,13 @@ endif(WITH_OPENMP)
 #--------------------------------------------------------
 # source directory
 #--------------------------------------------------------
-add_subdirectory(ext/pybind11)
+
+find_package(xtensor-python REQUIRED)
+include_directories(${xtensor-python_INCLUDE_DIRS})
+
+find_package(pybind11 REQUIRED)
+include_directories(${pybind11_INCLUDE_DIRS})
+
+
+
 add_subdirectory(src)
