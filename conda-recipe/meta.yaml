@@ -23,7 +23,6 @@ build:
 
 requirements:
   build:
-    - gcc 4.8.5 # [linux]
     - python 2.7*|3.5*|3.6*
     - python {{PY_VER}}*
     - numpy {{NPY_VER}}*
@@ -31,7 +30,6 @@ requirements:
     - boost 1.63.0
 
   run:
-    - libgcc 4.8.5 # [linux]
     - python {{PY_VER}}*
     - numpy  {{NPY_VER}}*
     - vigra 1.11*
