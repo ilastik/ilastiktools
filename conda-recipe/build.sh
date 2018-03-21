@@ -12,11 +12,15 @@ if [[ $(uname) == 'Darwin' ]]; then
     ILASTIKTOOLS_CXXFLAGS="${CFLAGS} -std=c++11 -stdlib=libc++"
 else
     DYLIB_EXT=so
-    CC=${PREFIX}/bin/gcc
-    CXX=${PREFIX}/bin/g++
+    CC=gcc
+    CXX=g++
     WITH_OPENMP=ON
 
     ILASTIKTOOLS_CXXFLAGS="${CFLAGS} -std=c++11"
+    # enable compilation without CXX abi to stay compatible with gcc < 5 built packages
+    if [[ ${DO_NOT_BUILD_WITH_CXX11_ABI} == '1' ]]; then
+        ILASTIKTOOLS_CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0 ${ILASTIKTOOLS_CXXFLAGS}"
+    fi
 fi
 
 PY_VER=$(python -c "import sys; print('{}.{}'.format(*sys.version_info[:2]))")
