@@ -36,7 +36,7 @@ requirements:
     - python {{PY_VER}}*
     - numpy  {{NPY_VER}}*
     # in order to suppor older linux distros after gcc5 switch:
-    - libstdcxx-ng >= 5.4.0  # [linux]
+    - libstdcxx-ng >=5.4.0  # [linux]
     - vigra 1.11*
     - boost 1.63.0
 
