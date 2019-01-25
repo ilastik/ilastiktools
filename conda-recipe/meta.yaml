@@ -17,12 +17,12 @@ build:
   msvc_compiler: 14.0 # [win]
   number: 2
   string: np{{CONDA_NPY}}py{{CONDA_PY}}_{{PKG_BUILDNUM}}_h{{PKG_HASH}}_g{{GIT_FULL_HASH[:7]}}
-  script_env:
-    # Control building with CXX11 abi
-    - DO_NOT_BUILD_WITH_CXX11_ABI  # [linux]
 
 requirements:
   build:
+    - {{ compiler("cxx") }}
+    - cmake
+  host:
     - python {{ python }}
     - numpy {{ numpy }}
     - vigra {{ vigra }}
@@ -31,8 +31,6 @@ requirements:
   run:
     - python
     - numpy
-    # in order to suppor older linux distros after gcc5 switch:
-    - libstdcxx-ng >={{ libstdcxxng }}  # [linux]
     - vigra
     - boost
 
