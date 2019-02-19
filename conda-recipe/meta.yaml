@@ -15,7 +15,7 @@ build:
   features:
     - vc14 # [win]
   msvc_compiler: 14.0 # [win]
-  number: 2
+  number: 0
   string: np{{CONDA_NPY}}py{{CONDA_PY}}_{{PKG_BUILDNUM}}_h{{PKG_HASH}}_g{{GIT_FULL_HASH[:7]}}
 
 requirements:
@@ -23,16 +23,15 @@ requirements:
     - {{ compiler("cxx") }}
     - cmake
   host:
-    - python {{ python }}
-    - numpy {{ numpy }}
-    - vigra {{ vigra }}
     - boost {{ boost }}
+    - python {{ python }}
+    - vigra {{ vigra }}
 
   run:
-    - python
-    - numpy
-    - vigra
-    - boost
+    - boost {{ boost }}
+    - numpy >=1.12
+    - python {{ python }}
+    - vigra {{ vigra }}
 
 test:
   imports:

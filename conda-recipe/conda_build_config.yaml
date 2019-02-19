@@ -3,13 +3,7 @@ boost:
 numpy:
   - 1.12
 python:
-  - 3.6
+  - 3.7
 vigra:
   - 1.11
 
-
-pin_run_as_build:
-  boost: x.x.x
-  numpy: x.x
-  python: x.x
-  vigra: x.x
