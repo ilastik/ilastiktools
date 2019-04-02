@@ -12,9 +12,6 @@ source:
   path: ../
 
 build:
-  features:
-    - vc14 # [win]
-  msvc_compiler: 14.0 # [win]
   number: 1000
   string: np{{CONDA_NPY}}py{{CONDA_PY}}_{{PKG_BUILDNUM}}_h{{PKG_HASH}}_g{{GIT_FULL_HASH[:7]}}
 
