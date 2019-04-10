@@ -12,30 +12,23 @@ source:
   path: ../
 
 build:
-  #
-  # You must build this recipe using 'conda build --numpy=X.Y'
-  #
-  features:
-    - vc14 # [win]
-  msvc_compiler: 14.0 # [win]
-  number: 0
-  string: np{{np}}py{{py}}_{{PKG_BUILDNUM}}_g{{GIT_FULL_HASH[:7]}}
+  number: 1000
+  string: np{{CONDA_NPY}}py{{CONDA_PY}}_{{PKG_BUILDNUM}}_h{{PKG_HASH}}_g{{GIT_FULL_HASH[:7]}}
 
 requirements:
   build:
-    - gcc 4.8.5 # [linux]
-    - python 2.7*|3.5*|3.6*
-    - python {{PY_VER}}*
-    - numpy {{NPY_VER}}*
-    - vigra 1.11*
-    - boost 1.63.0
+    - {{ compiler("cxx") }}
+    - cmake
+  host:
+    - boost {{ boost }}
+    - python {{ python }}
+    - vigra {{ vigra }}
 
   run:
-    - libgcc 4.8.5 # [linux]
-    - python {{PY_VER}}*
-    - numpy  {{NPY_VER}}*
-    - vigra 1.11*
-    - boost 1.63.0
+    - boost {{ boost }}
+    - numpy >=1.12
+    - python {{ python }}
+    - vigra {{ vigra }}
 
 test:
   imports:

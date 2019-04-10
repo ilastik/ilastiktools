@@ -1,0 +1,9 @@
+boost:
+  - 1.68.0
+numpy:
+  - 1.12
+python:
+  - 3.7
+vigra:
+  - 1.11
+

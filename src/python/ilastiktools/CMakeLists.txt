@@ -1,38 +1,20 @@
+find_package( PythonInterp REQUIRED )
+pybind11_add_module(_core core.cxx)
 
-
-#--------------------------------------------------------------
-# Add Library
-#--------------------------------------------------------------
-add_library( _core SHARED
-    core.cxx
-)
-#--------------------------------------------------------------
-# Link libraries
-#--------------------------------------------------------------
-find_library(RT rt)
-target_link_libraries( _core
-    ${PYTHON_LIBRARIES}
-    ${Boost_PYTHON_LIBRARIES}
-)
-
-IF(PYTHON_PLATFORM MATCHES "windows$" OR WIN32)
-    SET_TARGET_PROPERTIES( _core PROPERTIES OUTPUT_NAME "_core" PREFIX "" SUFFIX ".pyd")
-ELSEIF(APPLE)
-    SET_TARGET_PROPERTIES( _core PROPERTIES OUTPUT_NAME "_core" PREFIX "" SUFFIX ".so")
-ELSE()
-    SET_TARGET_PROPERTIES( _core PROPERTIES OUTPUT_NAME "_core" PREFIX "")
-ENDIF()
+execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
+                "from distutils.sysconfig import *; print(get_python_lib(1))"
+                OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
+file(TO_CMAKE_PATH ${PYTHON_SITE_PACKAGES} ILASTIKTOOLS_INSTALL_DIR)
+set(ILASTIKTOOLS_INSTALL_DIR "${PYTHON_SITE_PACKAGES}/ilastiktools")
+MESSAGE(STATUS "Found Ilastiktools install dir: ${ILASTIKTOOLS_INSTALL_DIR}")
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py  DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
+install(FILES __init__.py DESTINATION ${ILASTIKTOOLS_INSTALL_DIR})
 
-install(FILES __init__.py
-        DESTINATION ${PYTHON_SITE_PACKAGES}/ilastiktools)
+# this is the install path relative to CMAKE_INSTALL_PREFIX,
+# use this in INSTALL() commands to get packaging right
+file(RELATIVE_PATH ILASTIKTOOLS_INSTALL_DIR ${CMAKE_INSTALL_PREFIX} ${ILASTIKTOOLS_INSTALL_DIR})
 
-IF(PYTHON_PLATFORM MATCHES "windows$" OR WIN32)
-    install(TARGETS _core
-            RUNTIME DESTINATION ${PYTHON_SITE_PACKAGES}/ilastiktools)
-ELSE()
-    install(TARGETS _core
-            LIBRARY DESTINATION ${PYTHON_SITE_PACKAGES}/ilastiktools)
-ENDIF()
-
+install(TARGETS _core
+    RUNTIME DESTINATION ${ILASTIKTOOLS_INSTALL_DIR}
+    LIBRARY DESTINATION ${ILASTIKTOOLS_INSTALL_DIR})
