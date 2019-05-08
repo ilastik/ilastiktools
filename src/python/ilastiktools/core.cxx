@@ -362,7 +362,13 @@ void defineGridRag(py::module& module, const std::string & clsName){
     ;
 }
 
-
+template<unsigned int DIM, class LABEL_TYPE>
+void pyClearSeed(
+    GridSegmentor<DIM , LABEL_TYPE, float> & gridSegmentor,
+    const UInt8 labelToClear
+){
+    gridSegmentor.clearSeed(labelToClear);
+}
 
 
 template<unsigned int DIM, class LABEL_TYPE>
@@ -421,6 +427,7 @@ void defineGridSegmentor(py::module& module, const std::string & clsName){
         .def("maxEdgeId",&Segmentor::maxEdgeId)
         .def("run",&Segmentor::run)
         .def("clearSeeds",&Segmentor::clearSeeds)
+        .def("clearSeed",pyClearSeed<DIM, LABEL_TYPE>)
         .def("clearSegmentation",&Segmentor::clearSegmentation)
         .def("serializeGraph", &pySerializeGraph<DIM, LABEL_TYPE>, py::arg("out").none(false))
         .def("serializeGraph", [](const GridSegmentor<DIM , LABEL_TYPE, float> &g)->py::array_t<UInt32, py::array::f_style | py::array::forcecast>{ return pySerializeGraph<DIM, LABEL_TYPE>(g, nullptr);})

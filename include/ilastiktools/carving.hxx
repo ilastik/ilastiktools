@@ -356,6 +356,18 @@ namespace vigra{
             }
         }
 
+        template<class PIXEL_LABELS>
+        void clearSeed(
+            const PIXEL_LABELS labelToClear
+        ){
+            #pragma omp parallel for
+            for(ptrdiff_t i=0; i<(ptrdiff_t)this->nodeNum();++i){
+                if (nodeSeeds_[i] == labelToClear){
+                    nodeSeeds_[i] = 0;
+                }
+            }
+        }
+
         void clearSegmentation(){
             resultSegmentation_ = 0;
         }
