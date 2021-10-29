@@ -12,7 +12,7 @@ source:
   path: ../
 
 build:
-  number: 1000
+  number: 0
   string: np{{CONDA_NPY}}py{{CONDA_PY}}_{{PKG_BUILDNUM}}_h{{PKG_HASH}}_g{{GIT_FULL_HASH[:7]}}
 
 requirements:
@@ -21,13 +21,13 @@ requirements:
     - cmake
   host:
     - boost {{ boost }}
-    - python {{ python }}
+    - python
     - vigra {{ vigra }}
 
   run:
-    - boost {{ boost }}
+    - {{ pin_compatible("boost") }}
     - numpy >=1.12
-    - python {{ python }}
+    - {{ pin_compatible("python") }}
     - vigra {{ vigra }}
 
 test:
