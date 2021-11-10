@@ -19,6 +19,7 @@ requirements:
   build:
     - {{ compiler("cxx") }}
     - cmake
+    - make  # [not win]
   host:
     - boost {{ boost }}
     - python
