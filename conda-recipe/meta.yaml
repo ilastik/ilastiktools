@@ -29,7 +29,7 @@ requirements:
     - {{ pin_compatible("boost") }}
     - numpy >=1.12
     - {{ pin_compatible("python") }}
-    - vigra {{ vigra }}
+    - {{ pin_compatible("vigra") }}
 
 test:
   imports:
