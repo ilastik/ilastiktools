@@ -499,7 +499,7 @@ namespace vigra{
                     c[dd] = bgSeedsCoord(dd,i);
                 }
                 const UInt64 node = labels[c];
-                nodeSeeds_[node] = 2;
+                nodeSeeds_[node] = 1;
             }
         }
 
