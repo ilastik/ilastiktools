@@ -4,6 +4,9 @@ c_compiler:
 cxx_compiler:
   - vs2019                     # [win]
 
+pybind11_abi:
+  - 4
+
 boost:
   - 1.74
 vigra:

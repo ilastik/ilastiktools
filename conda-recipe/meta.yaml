@@ -23,6 +23,7 @@ requirements:
   host:
     - boost {{ boost }}
     - python
+    - pybind11
     - vigra {{ vigra }}
 
   run:
