@@ -27,7 +27,9 @@
 *.out
 *.app
 
-# Misc IDE files
+# IDE files
 .cproject
 .project
 .settings
+.idea/
+*.iml
