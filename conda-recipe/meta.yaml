@@ -1,0 +1,41 @@
+package:
+    name: ilastiktools
+
+  {% if GIT_DESCRIBE_NUMBER|int == 0 %}
+    version: {{GIT_DESCRIBE_TAG}}
+  {% else %}
+    # If we're using a non-tagged revision, append '.postN' to the version
+    version: {{GIT_DESCRIBE_TAG}}.post{{GIT_DESCRIBE_NUMBER}}
+  {% endif %}
+
+source:
+  path: ../
+
+build:
+  number: 0
+  string: py{{CONDA_PY}}_{{PKG_BUILDNUM}}_h{{PKG_HASH}}_g{{GIT_FULL_HASH[:7]}}
+
+requirements:
+  build:
+    - {{ compiler("cxx") }}
+    - cmake
+    - make  # [not win]
+  host:
+    - boost {{ boost }}
+    - python
+    - vigra {{ vigra }}
+
+  run:
+    - {{ pin_compatible("boost") }}
+    - numpy >=1.12
+    - {{ pin_compatible("python") }}
+    - {{ pin_compatible("vigra") }}
+
+test:
+  imports:
+    - ilastiktools
+
+about:
+  home: http://ilastik.org
+  license: GPLv3
+  summary: Various compiled utilities for the ilastik project

@@ -26,3 +26,10 @@
 *.exe
 *.out
 *.app
+
+# IDE files
+.cproject
+.project
+.settings
+.idea/
+*.iml
