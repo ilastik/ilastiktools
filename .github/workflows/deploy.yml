@@ -28,7 +28,7 @@ jobs:
           auto-activate-base: true
           activate-environment: bld-env
           environment-file: .github/workflows/etc/bld-environment.yml
-          condarc-file: .github/workflows/etc/.condarc
+          condarc-file: .github/workflows/etc/condarc-deploy.yml
           miniforge-variant: Miniforge3
           use-mamba: true
       - name: linux conda build
