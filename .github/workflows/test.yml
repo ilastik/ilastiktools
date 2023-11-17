@@ -21,12 +21,10 @@ jobs:
         with:
           auto-update-conda: true
           auto-activate-base: true
-          activate-environment: ""
-          channel-priority: strict
-          miniforge-variant: Mambaforge
+          activate-environment: bld-env
+          environment-file: .github/workflows/etc/bld-environment.yml
+          miniforge-variant: Miniforge3
           use-mamba: true
-      - name: install common dependencies
-        run: mamba install -n base -c conda-forge conda-build boa -y
       - name: linux conda build
         if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
