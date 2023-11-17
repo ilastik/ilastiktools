@@ -1,4 +1,4 @@
-find_package( PythonInterp REQUIRED )
+# find_package( PythonInterp REQUIRED )
 pybind11_add_module(_core core.cxx)
 
 execute_process(COMMAND ${PYTHON_EXECUTABLE} -c

@@ -35,6 +35,9 @@ include_directories(include)
 FIND_PACKAGE(VIGRA REQUIRED)
 include_directories(${VIGRA_INCLUDE_DIR})
 
+find_package(pybind11 REQUIRED)
+include_directories(${pybind11_INCLUDE_DIRS})
+
 FIND_PACKAGE(Threads REQUIRED)  # includes pthread
 
 #--------------------------------------------------------
@@ -54,5 +57,4 @@ endif(WITH_OPENMP)
 #--------------------------------------------------------
 # source directory
 #--------------------------------------------------------
-add_subdirectory(ext/pybind11)
 add_subdirectory(src)
