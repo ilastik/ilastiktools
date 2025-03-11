@@ -12,8 +12,7 @@ source:
   path: ../
 
 build:
-  number: 0
-  string: py{{CONDA_PY}}_{{PKG_BUILDNUM}}_h{{PKG_HASH}}_g{{GIT_FULL_HASH[:7]}}
+  number: 1
 
 requirements:
   build:
@@ -25,16 +24,16 @@ requirements:
     - cmake
     - make  # [not win]
   host:
-    - boost {{ boost }}
+    - libboost-devel {{ boost }}*
+    - libboost-python-devel {{ boost }}*
     - python
     - pybind11
     - vigra {{ vigra }}
 
   run:
-    - {{ pin_compatible("boost") }}
     - numpy >=1.12
-    - {{ pin_compatible("python") }}
-    - {{ pin_compatible("vigra") }}
+    - vigra {{ vigra }}
+    - python
 
 test:
   imports:
