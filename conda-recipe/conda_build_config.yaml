@@ -35,7 +35,7 @@ pybind11_abi:
 boost:
   - 1.86.0
 vigra:
-  - 1.12.1
+  - 1.12.2
 python:
   - 3.9
   - 3.10
