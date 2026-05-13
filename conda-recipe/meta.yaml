@@ -31,13 +31,20 @@ requirements:
     - vigra {{ vigra }}
 
   run:
-    - numpy >=1.12
+    - numpy >=1.12,<2
     - vigra {{ vigra }}
     - python
 
 test:
+  source_files:
+    - test-python
   imports:
     - ilastiktools
+  requires:
+    - pytest
+  commands:
+    - pytest -v test-python
+
 
 about:
   home: http://ilastik.org
