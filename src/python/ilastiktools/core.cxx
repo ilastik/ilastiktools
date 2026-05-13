@@ -676,7 +676,7 @@ py::dict line_segments_for_labels( const py::array_t<UInt32, py::array::f_style 
 
 
 
-PYBIND11_MODULE(_core, m)
+PYBIND11_MODULE(ilastiktools, m)
 {
     defineGridRag<2, vigra::UInt32>(m, "GridRag_2D_UInt32");
     defineGridSegmentor<2, vigra::UInt32>(m, "GridSegmentor_2D_UInt32");
