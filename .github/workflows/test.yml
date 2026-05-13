@@ -19,13 +19,12 @@ jobs:
           submodules: true
       - uses: conda-incubator/setup-miniconda@v3
         with:
+          activate-environment: ""
+          auto-activate: true
           auto-update-conda: true
-          auto-activate-base: true
-          activate-environment: bld-env
-          environment-file: .github/workflows/etc/bld-environment.yml
-          channel-priority: strict
           miniforge-version: latest
-          conda-solver: libmamba
+          conda-remove-defaults: true
+          conda-build-version: "*"
       - name: linux conda build
         if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
