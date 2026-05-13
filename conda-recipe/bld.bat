@@ -2,7 +2,6 @@ mkdir build
 cd build
 
 set CONFIGURATION=Release
-set PATH=%PATH%;%LIBRARY_PREFIX%\bin
 
 cmake .. ^
 	-G "NMake Makefiles" ^

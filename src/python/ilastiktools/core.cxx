@@ -681,7 +681,6 @@ PYBIND11_MODULE(ilastiktools, m)
     defineGridRag<2, vigra::UInt32>(m, "GridRag_2D_UInt32");
     defineGridSegmentor<2, vigra::UInt32>(m, "GridSegmentor_2D_UInt32");
 
-
     defineGridRag<3, vigra::UInt32>(m, "GridRag_3D_UInt32");
     defineGridSegmentor<3, vigra::UInt32>(m, "GridSegmentor_3D_UInt32");
 

@@ -20,18 +20,18 @@ requirements:
     - cross-python_{{ target_platform }}    # [build_platform != target_platform]
     - python                                # [build_platform != target_platform]
     - cython                                # [build_platform != target_platform]
-    - numpy                                 # [build_platform != target_platform]
+    - numpy <3                       # [build_platform != target_platform]
     - cmake
     - make  # [not win]
   host:
-    - libboost-headers {{ libboost_headers }}*
+    - libboost-headers
     - python
     - pybind11
-    - vigra {{ vigra }}
+    - vigra
 
   run:
-    - numpy >=1.12,<2
-    - vigra {{ vigra }}
+    - numpy <3
+    - vigra
     - python
 
 test:
@@ -41,6 +41,7 @@ test:
     - ilastiktools
   requires:
     - pytest
+    - python
   commands:
     - pytest -v test-python
 
