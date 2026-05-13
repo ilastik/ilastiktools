@@ -24,8 +24,7 @@ requirements:
     - cmake
     - make  # [not win]
   host:
-    - libboost-devel {{ boost }}*
-    - libboost-python-devel {{ boost }}*
+    - libboost-headers {{ libboost_headers }}*
     - python
     - pybind11
     - vigra {{ vigra }}
