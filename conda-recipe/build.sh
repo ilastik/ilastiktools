@@ -11,6 +11,7 @@ fi
 mkdir build
 cd build
 cmake ..\
+    ${CMAKE_ARGS} \
     -DCMAKE_CXX_FLAGS="${ILASTIKTOOLS_CXXFLAGS}" \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
     -DCMAKE_PREFIX_PATH=${PREFIX} \
