@@ -11,13 +11,11 @@ fi
 mkdir build
 cd build
 cmake ..\
+    ${CMAKE_ARGS} \
     -DCMAKE_CXX_FLAGS="${ILASTIKTOOLS_CXXFLAGS}" \
     -DCMAKE_INSTALL_PREFIX=${PREFIX} \
     -DCMAKE_PREFIX_PATH=${PREFIX} \
     -DPython_EXECUTABLE=${PYTHON} \
-    -DVIGRA_INCLUDE_DIR=${PREFIX}/include \
-    -DVIGRA_IMPEX_LIBRARY=${PREFIX}/lib/libvigraimpex${SHLIB_EXT} \
-    -DVIGRA_NUMPY_CORE_LIBRARY=${SP_DIR}/vigra/vigranumpycore${SHLIB_EXT} \
     -DWITH_OPENMP=${WITH_OPENMP} \
 ##
 
