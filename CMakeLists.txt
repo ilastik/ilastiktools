@@ -32,8 +32,8 @@ file(GLOB_RECURSE headers ${CMAKE_INSTALL_PREFIX}/include/*.hxx)
 include_directories(include)
 
 
-FIND_PACKAGE(VIGRA REQUIRED)
-include_directories(${VIGRA_INCLUDE_DIR})
+FIND_PACKAGE(Vigra REQUIRED)
+include_directories(${Vigra_INCLUDE_DIRS})
 
 FIND_PACKAGE(Threads REQUIRED)  # includes pthread
 
