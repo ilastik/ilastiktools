@@ -1,20 +1,8 @@
-# find_package( PythonInterp REQUIRED )
-pybind11_add_module(_core core.cxx)
+find_package(Python REQUIRED Interpreter Development)
+find_package(pybind11 CONFIG)
 
-execute_process(COMMAND ${PYTHON_EXECUTABLE} -c
-                "from distutils.sysconfig import *; print(get_python_lib(1))"
-                OUTPUT_VARIABLE PYTHON_SITE_PACKAGES OUTPUT_STRIP_TRAILING_WHITESPACE)
-file(TO_CMAKE_PATH ${PYTHON_SITE_PACKAGES} ILASTIKTOOLS_INSTALL_DIR)
-set(ILASTIKTOOLS_INSTALL_DIR "${PYTHON_SITE_PACKAGES}/ilastiktools")
-MESSAGE(STATUS "Found Ilastiktools install dir: ${ILASTIKTOOLS_INSTALL_DIR}")
+pybind11_add_module(ilastiktools core.cxx)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/__init__.py  DESTINATION ${CMAKE_CURRENT_BINARY_DIR} )
-install(FILES __init__.py DESTINATION ${ILASTIKTOOLS_INSTALL_DIR})
-
-# this is the install path relative to CMAKE_INSTALL_PREFIX,
-# use this in INSTALL() commands to get packaging right
-file(RELATIVE_PATH ILASTIKTOOLS_INSTALL_DIR ${CMAKE_INSTALL_PREFIX} ${ILASTIKTOOLS_INSTALL_DIR})
-
-install(TARGETS _core
-    RUNTIME DESTINATION ${ILASTIKTOOLS_INSTALL_DIR}
-    LIBRARY DESTINATION ${ILASTIKTOOLS_INSTALL_DIR})
+install(TARGETS ilastiktools
+          LIBRARY DESTINATION ${Python_SITELIB}
+          RUNTIME DESTINATION ${Python_SITELIB})
