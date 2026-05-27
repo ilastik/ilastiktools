@@ -27,10 +27,7 @@ enable_testing()
 #--------------------------------------------------------
 # global headers
 #--------------------------------------------------------
-file(GLOB_RECURSE headers include/*.hxx)
-file(GLOB_RECURSE headers ${CMAKE_INSTALL_PREFIX}/include/*.hxx)
 include_directories(include)
-
 
 FIND_PACKAGE(Vigra REQUIRED)
 include_directories(${Vigra_INCLUDE_DIRS})
