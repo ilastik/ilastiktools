@@ -19,21 +19,21 @@ jobs:
           submodules: true
       - uses: conda-incubator/setup-miniconda@v4
         with:
-          activate-environment: ""
+          activate-environment: "build"
           auto-activate: true
           auto-update-conda: true
+          environment-file: .github/workflows/etc/bld-environment.yml
           miniforge-version: latest
           conda-remove-defaults: true
-          conda-build-version: "*"
       - name: linux conda build
         if: matrix.os == 'ubuntu-latest'
         shell: bash -l {0}
-        run: conda build -c conda-forge conda-recipe
+        run: rattler-build build -c conda-forge -r conda-recipe/recipe.yaml
       - name: osx conda build
         if: matrix.os == 'macos-latest'
         shell: bash -l {0}
-        run:  conda build -c conda-forge conda-recipe
+        run: rattler-build build -c conda-forge -r conda-recipe/recipe.yaml
       - name: windows conda build
         if: matrix.os == 'windows-latest'
         shell: cmd /C CALL {0}
-        run: conda build -c conda-forge conda-recipe
+        run: rattler-build build -c conda-forge -r conda-recipe\recipe.yaml
