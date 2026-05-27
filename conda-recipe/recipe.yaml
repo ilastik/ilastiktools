@@ -1,0 +1,56 @@
+schema_version: 1
+
+context:
+  version: 0.3.0
+
+source:
+  path: ..
+
+package:
+  name: ilastiktools
+  version: ${{ version }}
+
+build:
+  number: 0
+
+requirements:
+  build:
+    - if: build_platform != target_platform
+      then:
+        - cross-python_${{ target_platform }}
+        - python
+        - cython
+    - if: not win
+      then:
+        - make
+    - cmake
+    - ${{ compiler("c") }}
+    - ${{ compiler("cxx") }}
+  host:
+    - libboost-headers
+    - python
+    - pybind11
+    - vigra
+  run:
+    - numpy <3
+    - vigra
+    - python
+
+tests:
+  - script:
+      - pytest -v test-python
+    files:
+      source:
+        - test-python/*.py
+    requirements:
+      run:
+        - pytest
+  - python:
+      imports:
+        - ilastiktools
+
+
+about:
+  homepage: http://ilastik.org
+  license: GPL-3.0-or-later
+  summary: Various compiled utilities for the ilastik project
