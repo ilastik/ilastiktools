@@ -1,5 +1,5 @@
+name: build
 channels:
   - conda-forge
 dependencies:
-  - anaconda-client
-  - conda-build
+  - rattler-build
