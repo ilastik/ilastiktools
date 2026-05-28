@@ -53,3 +53,5 @@ tests:
 about:
   homepage: http://ilastik.org
   summary: Various compiled carving utilities for the ilastik project
+  license: MIT
+  license_file: LICENSE
