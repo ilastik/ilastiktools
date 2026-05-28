@@ -7,7 +7,7 @@ source:
   path: ..
 
 package:
-  name: ilastiktools
+  name: ilastik_carving_tools
   version: ${{ version }}
 
 build:
@@ -47,10 +47,9 @@ tests:
         - pytest
   - python:
       imports:
-        - ilastiktools
+        - ilastik_carving_tools
 
 
 about:
   homepage: http://ilastik.org
-  license: GPL-3.0-or-later
-  summary: Various compiled utilities for the ilastik project
+  summary: Various compiled carving utilities for the ilastik project
