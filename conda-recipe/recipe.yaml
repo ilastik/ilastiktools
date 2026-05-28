@@ -51,7 +51,7 @@ tests:
 
 
 about:
-  homepage: http://ilastik.org
+  homepage: https://github.com/ilastik/ilastik-carving-tools
   summary: Various compiled carving utilities for the ilastik project
   license: MIT
   license_file: LICENSE
