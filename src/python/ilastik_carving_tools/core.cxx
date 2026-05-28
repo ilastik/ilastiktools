@@ -48,11 +48,11 @@
 #include <boost/functional/hash.hpp>
 
 /*vigra*/
-#include <ilastiktools/carving.hxx>
+#include <ilastik_carving_tools/carving.hxx>
 
 
 /*vigra python */
-#include <ilastiktools/python_vigra_converter.hxx>
+#include <ilastik_carving_tools/python_vigra_converter.hxx>
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
@@ -676,7 +676,7 @@ py::dict line_segments_for_labels( const py::array_t<UInt32, py::array::f_style 
 
 
 
-PYBIND11_MODULE(ilastiktools, m)
+PYBIND11_MODULE(ilastik_carving_tools, m)
 {
     defineGridRag<2, vigra::UInt32>(m, "GridRag_2D_UInt32");
     defineGridSegmentor<2, vigra::UInt32>(m, "GridSegmentor_2D_UInt32");

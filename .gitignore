@@ -33,3 +33,9 @@
 .settings
 .idea/
 *.iml
+
+# Mac
+.DS_store
+
+# rattler-build output
+output/*

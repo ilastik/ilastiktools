@@ -1,1 +1,1 @@
-add_subdirectory(ilastiktools)
+add_subdirectory(ilastik_carving_tools)

@@ -8,22 +8,10 @@ ELSE()
    SET(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel.")
 ENDIF()
 
-#----------------------------------------------------
-# ilastiktools
-#----------------------------------------------------
+
 cmake_minimum_required(VERSION 3.10)
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules)
 
-project(ilastiktools)
-set (ILASTIKTOOLS_VERSION_MAJOR 0)
-set (ILASTIKTOOLS_VERSION_MINOR 3)
-set (ILASTIKTOOLS_VERSION_PATCH 0)
-
-#--------------------------------------------------------
-# enable_testing
-#--------------------------------------------------------
-enable_testing()
-
+project(ilastik_carving_tools)
 #--------------------------------------------------------
 # global headers
 #--------------------------------------------------------

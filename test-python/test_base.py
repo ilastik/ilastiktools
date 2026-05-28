@@ -1,12 +1,12 @@
-import ilastiktools
+import ilastik_carving_tools
 import numpy as np
 import numpy.typing as npt
 import pytest
 
 
 @pytest.fixture
-def gridseg() -> ilastiktools.GridSegmentor_3D_UInt32:
-    return ilastiktools.GridSegmentor_3D_UInt32()
+def gridseg() -> ilastik_carving_tools.GridSegmentor_3D_UInt32:
+    return ilastik_carving_tools.GridSegmentor_3D_UInt32()
 
 
 @pytest.fixture
@@ -34,7 +34,7 @@ def brush_stroke() -> npt.NDArray[np.uint8]:
 
 
 def test_minimal(
-    gridseg: ilastiktools.GridSegmentor_3D_UInt32,
+    gridseg: ilastik_carving_tools.GridSegmentor_3D_UInt32,
     labels: npt.NDArray[np.uint32],
     features: npt.NDArray[np.uint32],
     brush_stroke: npt.NDArray[np.uint8],
